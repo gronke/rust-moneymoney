@@ -1,6 +1,6 @@
 use crate::{MoneymoneyActions, call_action_plist};
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use uuid::Uuid;
 
 #[derive(Debug)]
