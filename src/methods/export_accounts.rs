@@ -13,6 +13,7 @@ pub enum MoneymoneyAccountType {
     CreditCard,
     Cash,
     Other,
+    Custom(String),
 }
 
 impl Serialize for MoneymoneyAccountType {
@@ -29,6 +30,7 @@ impl Serialize for MoneymoneyAccountType {
             MoneymoneyAccountType::CreditCard => "Credit card",
             MoneymoneyAccountType::Cash => todo!(),
             MoneymoneyAccountType::Other => "Other",
+            MoneymoneyAccountType::Custom(value) => value,
         };
         serializer.serialize_str(s)
     }
@@ -49,16 +51,7 @@ impl<'de> Deserialize<'de> for MoneymoneyAccountType {
             "Credit card" | "Kreditkarte" => Ok(MoneymoneyAccountType::CreditCard),
             "Cash" | "Bargeld" => Ok(MoneymoneyAccountType::Cash),
             "Other" | "Sonstige" => Ok(MoneymoneyAccountType::Other),
-            other => Err(de::Error::unknown_variant(other, &[
-                "Account group",
-                "Giro account",
-                "Savings account",
-                "Fixed term deposit",
-                "Loan account",
-                "Credit card",
-                "Cash",
-                "Other",
-            ])),
+            other => Ok(MoneymoneyAccountType::Custom(other.to_string())),
         }
     }
 }
@@ -92,8 +85,14 @@ mod tests {
     #[test]
     fn test_list_accounts() {
         let accounts = super::call();
+
+        // at least there is "All accounts"
         assert!(accounts.len() > 0);
-        let account = &accounts[0];
-        assert_eq!(account.name, "All accounts");
+        assert!(
+            accounts
+                .iter()
+                .any(|account| account.name == "All accounts"),
+            "Expected at least one account with name 'All accounts', found none!"
+        );
     }
 }
