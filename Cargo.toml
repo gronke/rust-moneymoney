@@ -1,0 +1,26 @@
+[package]
+name = "moneymoney"
+version = "0.1.0"
+description = "AppleScript interface to MoneyMoney app (macOS)"
+authors = ["Stefan Grönke <stefan@gronke.net>"]
+homepage = "https://github.com/gronke/rust-moneymoney"
+repository = "https://github.com/gronke/rust-moneymoney"
+readme = "README.md"
+license = "MIT"
+keywords = ["moneymoney", "applescript", "osascript", "macos"]
+categories = ["finance", "os::macos-apis"]
+edition = "2021"
+include = ["src/**", "LICENSE", "README.md"]
+
+[dependencies]
+chrono = { version = "0.4.39", features = ["serde"] }
+iso_currency = { version = "0.5.1", features = ["with-serde"] }
+osascript = "0.3.0"
+plist = "1.7.0"
+serde = { version = "1.0.217", features = ["derive"] }
+serde_derive = "1.0.217"
+serde_json = "1.0.137"
+uuid = { version = "1.12.1", features = ["serde"] }
+
+[features]
+experimental = []
