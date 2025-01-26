@@ -10,10 +10,10 @@
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=moneymoney-osascript"
+                    "--package=moneymoney"
                 ],
                 "filter": {
-                    "name": "moneymoney_osascript",
+                    "name": "moneymoney",
                     "kind": "lib"
                 }
             },
