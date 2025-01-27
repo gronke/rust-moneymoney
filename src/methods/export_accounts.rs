@@ -57,11 +57,31 @@ impl<'de> Deserialize<'de> for MoneymoneyAccountType {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(from = "Vec<BalanceTuple>")]
+pub struct AccountBalance {
+    pub amount: f64,
+    pub currency: iso_currency::Currency
+}
+
+#[derive(Debug, Deserialize)]
+struct BalanceTuple(f64, String);
+
+impl From<Vec<BalanceTuple>> for AccountBalance {
+    fn from(tuple: Vec<BalanceTuple>) -> Self {
+        let balance = &tuple[0];
+        AccountBalance {
+            amount: balance.0,
+            currency: iso_currency::Currency::from_code(&balance.1).unwrap(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct MoneymoneyAccount {
     pub account_number: String,
     pub attributes: plist::Dictionary,
-    pub balance: Vec<(f64, String)>,
+    pub balance: AccountBalance,
     pub bank_code: String,
     pub currency: String,
     pub group: bool,
