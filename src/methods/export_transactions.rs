@@ -3,14 +3,14 @@ use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-fn fail() -> NaiveDate {
+fn fail_start_date() -> NaiveDate {
     panic!("Start date required");
 }
 
 #[derive(Serialize, Deserialize, Default, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ExportTransactionsParams {
-    #[serde(default = "fail")]
+    #[serde(default = "fail_start_date")]
     pub from_date: NaiveDate,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub to_date: Option<String>,
