@@ -1,6 +1,6 @@
 [package]
 name = "moneymoney"
-version = "0.1.0"
+version = "0.1.1"
 description = "AppleScript interface to MoneyMoney app (macOS)"
 authors = ["Stefan Grönke <stefan@gronke.net>"]
 homepage = "https://github.com/gronke/rust-moneymoney"
