@@ -1,5 +1,5 @@
 use serde;
-use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 mod methods;
 pub use methods::*;
@@ -59,14 +59,10 @@ pub fn call_action_plist<T>(action: MoneymoneyActions) -> Result<T, Error>
 where
     T: DeserializeOwned + Serialize,
 {
-    let plist_response = call_action(action)
-        .map_err(|e| Error::OsaScript(e))?;
+    let plist_response = call_action(action).map_err(|e| Error::OsaScript(e))?;
 
     match plist_response {
-        Some(v) => {
-            Ok(plist::from_bytes(v.as_bytes())
-                .map_err(|e| Error::Plist(e))?)
-        }
-        None => Err(Error::EmptyPlist)
+        Some(v) => Ok(plist::from_bytes(v.as_bytes()).map_err(|e| Error::Plist(e))?),
+        None => Err(Error::EmptyPlist),
     }
 }

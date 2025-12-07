@@ -1,4 +1,4 @@
-use crate::{MoneymoneyActions, call_action_plist};
+use crate::{call_action_plist, MoneymoneyActions};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use uuid::Uuid;
@@ -60,7 +60,7 @@ impl<'de> Deserialize<'de> for MoneymoneyAccountType {
 #[serde(from = "Vec<BalanceTuple>")]
 pub struct AccountBalance {
     pub amount: f64,
-    pub currency: iso_currency::Currency
+    pub currency: iso_currency::Currency,
 }
 
 #[derive(Debug, Deserialize)]
@@ -105,8 +105,6 @@ mod tests {
     #[test]
     fn test_list_accounts() {
         let accounts = super::call();
-
-        // at least there is "All accounts"
         assert!(accounts.len() > 0);
         assert!(
             accounts

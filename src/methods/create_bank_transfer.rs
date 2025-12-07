@@ -1,4 +1,4 @@
-use crate::{MoneymoneyActions, call_action_plist};
+use crate::{call_action_plist, MoneymoneyActions};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Default)]
