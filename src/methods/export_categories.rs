@@ -1,4 +1,4 @@
-use crate::{MoneymoneyActions, call_action_plist};
+use crate::{MoneymoneyActions, call_action_plist, Error};
 use iso_currency::Currency;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -62,7 +62,7 @@ pub struct MoneymoneyCategory {
     pub indentation: u8,
 }
 
-pub fn call() -> Vec<MoneymoneyCategory> {
+pub fn call() -> Result<Vec<MoneymoneyCategory>, Error> {
     call_action_plist(MoneymoneyActions::ExportCategories)
 }
 
@@ -71,7 +71,6 @@ mod tests {
 
     #[test]
     fn test_list_categories() {
-        super::call();
-        // ToDo: build testing automation for proper testing beyond a functional check
+        assert!(super::call().is_ok())
     }
 }

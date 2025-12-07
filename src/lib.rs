@@ -26,13 +26,20 @@ impl MoneymoneyActions {
     }
 }
 
+#[derive(Debug)]
+pub enum Error {
+    OsaScript(osascript::Error),
+    Plist(plist::Error),
+    EmptyPlist,
+}
+
 #[derive(Serialize, Deserialize)]
 struct ScriptAction {
     method: String,
     args: MoneymoneyActions,
 }
 
-pub fn call_action(action: MoneymoneyActions) -> Option<String> {
+pub fn call_action(action: MoneymoneyActions) -> Result<Option<String>, osascript::Error> {
     let params = ScriptAction {
         method: action.method_name(),
         args: action,
@@ -45,13 +52,21 @@ pub fn call_action(action: MoneymoneyActions) -> Option<String> {
         return Application('MoneyMoney')[$params.method]($params.args || []);
     ",
     );
-    script.execute_with_params(&params).unwrap()
+    script.execute_with_params(&params)
 }
 
-pub fn call_action_plist<T>(action: MoneymoneyActions) -> T
+pub fn call_action_plist<T>(action: MoneymoneyActions) -> Result<T, Error>
 where
     T: DeserializeOwned + Serialize,
 {
-    let plist_response = call_action(action);
-    plist::from_bytes(plist_response.unwrap().as_bytes()).unwrap()
+    let plist_response = call_action(action)
+        .map_err(|e| Error::OsaScript(e))?;
+
+    match plist_response {
+        Some(v) => {
+            Ok(plist::from_bytes(v.as_bytes())
+                .map_err(|e| Error::Plist(e))?)
+        }
+        None => Err(Error::EmptyPlist)
+    }
 }

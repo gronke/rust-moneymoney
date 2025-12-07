@@ -1,4 +1,4 @@
-use crate::{MoneymoneyActions, call_action_plist};
+use crate::{MoneymoneyActions, call_action_plist, Error};
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -42,7 +42,7 @@ pub struct TransactionsResponse {
     pub transactions: Vec<MoneymoneyTransaction>,
 }
 
-pub fn call(params: ExportTransactionsParams) -> TransactionsResponse {
+pub fn call(params: ExportTransactionsParams) -> Result<TransactionsResponse, Error> {
     call_action_plist(MoneymoneyActions::ExportTransactions(params.into()))
 }
 
@@ -57,7 +57,7 @@ mod tests {
             from_date: chrono::NaiveDate::from_ymd_opt(2024, 01, 01).unwrap(),
             ..Default::default()
         };
-        super::call(transaction_params);
-        // ToDo: build testing automation for proper testing beyond a functional check
+        let response = super::call(transaction_params);
+        assert!(response.is_ok())
     }
 }

@@ -96,7 +96,7 @@ pub struct MoneymoneyAccount {
 }
 
 pub fn call() -> Vec<MoneymoneyAccount> {
-    call_action_plist(MoneymoneyActions::ExportAccounts)
+    call_action_plist(MoneymoneyActions::ExportAccounts).unwrap()
 }
 
 #[cfg(test)]
