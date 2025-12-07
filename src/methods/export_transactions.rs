@@ -13,7 +13,7 @@ pub struct ExportTransactionsParams {
     #[serde(default = "fail_start_date")]
     pub from_date: NaiveDate,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub to_date: Option<String>,
+    pub to_date: Option<NaiveDate>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub from_account: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
