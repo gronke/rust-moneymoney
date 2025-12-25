@@ -174,15 +174,95 @@ pub fn call(params: ExportTransactionsParams) -> Result<TransactionsResponse, Er
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use chrono::NaiveDate;
 
-    use super::ExportTransactionsParams;
-
+    // Integration test - requires MoneyMoney running
     #[test]
     fn test_export_transactions() {
         let transaction_params = ExportTransactionsParams::new(
-            chrono::NaiveDate::from_ymd_opt(2024, 01, 01).expect("Valid date")
+            NaiveDate::from_ymd_opt(2024, 01, 01).expect("Valid date")
         );
         let response = super::call(transaction_params);
         assert!(response.is_ok())
+    }
+
+    // Unit tests for ExportTransactionsParams builder pattern
+    #[test]
+    fn test_params_builder_basic() {
+        let from = NaiveDate::from_ymd_opt(2024, 1, 1).unwrap();
+        let params = ExportTransactionsParams::new(from);
+
+        assert_eq!(params.from_date, from);
+        assert!(params.to_date.is_none());
+        assert!(params.from_account.is_none());
+        assert!(params.from_category.is_none());
+    }
+
+    #[test]
+    fn test_params_builder_with_to_date() {
+        let from = NaiveDate::from_ymd_opt(2024, 1, 1).unwrap();
+        let to = NaiveDate::from_ymd_opt(2024, 12, 31).unwrap();
+        let params = ExportTransactionsParams::new(from).to_date(to);
+
+        assert_eq!(params.from_date, from);
+        assert_eq!(params.to_date, Some(to));
+    }
+
+    #[test]
+    fn test_params_builder_with_account() {
+        let from = NaiveDate::from_ymd_opt(2024, 1, 1).unwrap();
+        let params = ExportTransactionsParams::new(from)
+            .from_account("DE89370400440532013000");
+
+        assert_eq!(params.from_account, Some("DE89370400440532013000".to_string()));
+    }
+
+    #[test]
+    fn test_params_builder_with_category() {
+        let from = NaiveDate::from_ymd_opt(2024, 1, 1).unwrap();
+        let params = ExportTransactionsParams::new(from)
+            .from_category("Groceries");
+
+        assert_eq!(params.from_category, Some("Groceries".to_string()));
+    }
+
+    #[test]
+    fn test_params_builder_chaining() {
+        let from = NaiveDate::from_ymd_opt(2024, 1, 1).unwrap();
+        let to = NaiveDate::from_ymd_opt(2024, 12, 31).unwrap();
+        let params = ExportTransactionsParams::new(from)
+            .to_date(to)
+            .from_account("test-account")
+            .from_category("test-category");
+
+        assert_eq!(params.from_date, from);
+        assert_eq!(params.to_date, Some(to));
+        assert_eq!(params.from_account, Some("test-account".to_string()));
+        assert_eq!(params.from_category, Some("test-category".to_string()));
+    }
+
+    #[test]
+    fn test_params_serialization() {
+        let from = NaiveDate::from_ymd_opt(2024, 1, 1).unwrap();
+        let params = ExportTransactionsParams::new(from);
+
+        let json = serde_json::to_string(&params).unwrap();
+        assert!(json.contains("\"fromDate\":\"2024-01-01\""));
+        assert!(!json.contains("toDate"));  // None values skipped
+    }
+
+    #[test]
+    fn test_params_serialization_with_optionals() {
+        let from = NaiveDate::from_ymd_opt(2024, 1, 1).unwrap();
+        let to = NaiveDate::from_ymd_opt(2024, 12, 31).unwrap();
+        let params = ExportTransactionsParams::new(from)
+            .to_date(to)
+            .from_account("test");
+
+        let json = serde_json::to_string(&params).unwrap();
+        assert!(json.contains("\"fromDate\":\"2024-01-01\""));
+        assert!(json.contains("\"toDate\":\"2024-12-31\""));
+        assert!(json.contains("\"fromAccount\":\"test\""));
     }
 }
