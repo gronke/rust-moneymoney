@@ -235,7 +235,9 @@ pub fn call() -> Result<Vec<MoneymoneyAccount>, crate::Error> {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
 
+    // Integration test - requires MoneyMoney running
     #[test]
     fn test_list_accounts() {
         let accounts = super::call().expect("Failed to retrieve accounts");
@@ -246,5 +248,139 @@ mod tests {
                 .any(|account| account.name == "All accounts"),
             "Expected at least one account with name 'All accounts', found none!"
         );
+    }
+
+    // Unit tests for MoneymoneyAccountType serialization
+    #[test]
+    fn test_account_type_deserialize_english() {
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Account group""#).unwrap(),
+            MoneymoneyAccountType::Group
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Giro account""#).unwrap(),
+            MoneymoneyAccountType::Giro
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Savings account""#).unwrap(),
+            MoneymoneyAccountType::Savings
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Fixed term deposit""#).unwrap(),
+            MoneymoneyAccountType::FixedTermDeposit
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Loan account""#).unwrap(),
+            MoneymoneyAccountType::Loan
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Credit card""#).unwrap(),
+            MoneymoneyAccountType::CreditCard
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Cash""#).unwrap(),
+            MoneymoneyAccountType::Cash
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Other""#).unwrap(),
+            MoneymoneyAccountType::Other
+        ));
+    }
+
+    #[test]
+    fn test_account_type_deserialize_german() {
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Kontengruppe""#).unwrap(),
+            MoneymoneyAccountType::Group
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Girokonto""#).unwrap(),
+            MoneymoneyAccountType::Giro
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Sparkonto""#).unwrap(),
+            MoneymoneyAccountType::Savings
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Festgeldanlage""#).unwrap(),
+            MoneymoneyAccountType::FixedTermDeposit
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Darlehenskonto""#).unwrap(),
+            MoneymoneyAccountType::Loan
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Kreditkarte""#).unwrap(),
+            MoneymoneyAccountType::CreditCard
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Bargeld""#).unwrap(),
+            MoneymoneyAccountType::Cash
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Sonstige""#).unwrap(),
+            MoneymoneyAccountType::Other
+        ));
+    }
+
+    #[test]
+    fn test_account_type_deserialize_custom() {
+        match serde_json::from_str::<MoneymoneyAccountType>(r#""Investment Account""#).unwrap() {
+            MoneymoneyAccountType::Custom(s) => assert_eq!(s, "Investment Account"),
+            _ => panic!("Expected Custom variant"),
+        }
+    }
+
+    #[test]
+    fn test_account_type_serialize() {
+        assert_eq!(
+            serde_json::to_string(&MoneymoneyAccountType::Cash).unwrap(),
+            r#""Cash""#
+        );
+        assert_eq!(
+            serde_json::to_string(&MoneymoneyAccountType::Giro).unwrap(),
+            r#""Giro account""#
+        );
+        assert_eq!(
+            serde_json::to_string(&MoneymoneyAccountType::Custom("Test".to_string())).unwrap(),
+            r#""Test""#
+        );
+    }
+
+    // Unit tests for AccountBalance TryFrom
+    #[test]
+    fn test_account_balance_try_from_valid() {
+        let tuple = vec![BalanceTuple(100.50, "EUR".to_string())];
+        let balance = AccountBalance::try_from(tuple).unwrap();
+        assert_eq!(balance.amount, 100.50);
+        assert_eq!(balance.currency.code(), "EUR");
+    }
+
+    #[test]
+    fn test_account_balance_try_from_invalid_currency() {
+        let tuple = vec![BalanceTuple(100.50, "INVALID".to_string())];
+        let result = AccountBalance::try_from(tuple);
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            crate::Error::InvalidCurrency(code) => assert_eq!(code, "INVALID"),
+            _ => panic!("Expected InvalidCurrency error"),
+        }
+    }
+
+    #[test]
+    fn test_account_balance_try_from_empty() {
+        let tuple: Vec<BalanceTuple> = vec![];
+        let result = AccountBalance::try_from(tuple);
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), crate::Error::EmptyPlist));
+    }
+
+    #[test]
+    fn test_account_balance_try_from_various_currencies() {
+        for code in &["USD", "GBP", "JPY", "CHF"] {
+            let tuple = vec![BalanceTuple(123.45, code.to_string())];
+            let balance = AccountBalance::try_from(tuple).unwrap();
+            assert_eq!(balance.currency.code(), *code);
+        }
     }
 }
