@@ -103,8 +103,8 @@ pub struct MoneymoneyAccount {
     pub uuid: Uuid,
 }
 
-pub fn call() -> Vec<MoneymoneyAccount> {
-    call_action_plist(MoneymoneyActions::ExportAccounts).unwrap()
+pub fn call() -> Result<Vec<MoneymoneyAccount>, crate::Error> {
+    call_action_plist(MoneymoneyActions::ExportAccounts)
 }
 
 #[cfg(test)]
@@ -112,7 +112,7 @@ mod tests {
 
     #[test]
     fn test_list_accounts() {
-        let accounts = super::call();
+        let accounts = super::call().expect("Failed to retrieve accounts");
         assert!(accounts.len() > 0);
         assert!(
             accounts
