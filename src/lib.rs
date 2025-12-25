@@ -99,20 +99,44 @@ impl MoneymoneyActions {
     }
 }
 
+/// Errors that can occur when interacting with MoneyMoney.
+///
+/// This enum represents all possible error conditions that may arise
+/// when communicating with the MoneyMoney application or processing its responses.
 #[derive(Debug, Error)]
 pub enum Error {
+    /// An error occurred during OSA script execution.
+    ///
+    /// This typically indicates that:
+    /// - MoneyMoney is not running
+    /// - The script execution was denied
+    /// - JavaScript/AppleScript syntax error
     #[error("OSA script execution failed: {0}")]
     OsaScript(#[from] osascript::Error),
 
+    /// An error occurred while parsing the plist response from MoneyMoney.
+    ///
+    /// This usually indicates that MoneyMoney returned data in an unexpected format.
     #[error("Plist deserialization failed: {0}")]
     Plist(#[from] plist::Error),
 
+    /// MoneyMoney returned an empty response when data was expected.
+    ///
+    /// This may occur if:
+    /// - No data matches the query criteria
+    /// - The operation succeeded but has no return value
     #[error("Received empty plist response from MoneyMoney")]
     EmptyPlist,
 
+    /// An invalid currency code was encountered during parsing.
+    ///
+    /// This error contains the invalid currency code string that was received.
     #[error("Invalid currency code: {0}")]
     InvalidCurrency(String),
 
+    /// A required parameter was missing from the request.
+    ///
+    /// This error contains the name of the missing parameter.
     #[error("Missing required parameter: {0}")]
     MissingRequiredParameter(&'static str),
 }
