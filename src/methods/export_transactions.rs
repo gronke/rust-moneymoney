@@ -171,7 +171,7 @@ pub struct TransactionsResponse {
 /// # }
 /// ```
 pub fn call(params: ExportTransactionsParams) -> Result<TransactionsResponse, Error> {
-    call_action_plist(MoneymoneyActions::ExportTransactions(params.into()))
+    call_action_plist(MoneymoneyActions::ExportTransactions(params))
 }
 
 #[cfg(test)]
@@ -182,9 +182,8 @@ mod tests {
     // Integration test - requires MoneyMoney running
     #[test]
     fn test_export_transactions() {
-        let transaction_params = ExportTransactionsParams::new(
-            NaiveDate::from_ymd_opt(2024, 01, 01).expect("Valid date"),
-        );
+        let transaction_params =
+            ExportTransactionsParams::new(NaiveDate::from_ymd_opt(2024, 1, 1).expect("Valid date"));
         let response = super::call(transaction_params);
         assert!(response.is_ok())
     }

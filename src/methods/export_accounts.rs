@@ -128,7 +128,7 @@ impl TryFrom<Vec<BalanceTuple>> for AccountBalance {
     type Error = crate::Error;
 
     fn try_from(tuple: Vec<BalanceTuple>) -> Result<Self, Self::Error> {
-        let balance = tuple.get(0).ok_or(crate::Error::EmptyPlist)?;
+        let balance = tuple.first().ok_or(crate::Error::EmptyPlist)?;
 
         let currency = iso_currency::Currency::from_code(&balance.1)
             .ok_or_else(|| crate::Error::InvalidCurrency(balance.1.clone()))?;
@@ -239,7 +239,7 @@ mod tests {
     #[test]
     fn test_list_accounts() {
         let accounts = super::call().expect("Failed to retrieve accounts");
-        assert!(accounts.len() > 0);
+        assert!(!accounts.is_empty());
         assert!(
             accounts
                 .iter()

@@ -71,7 +71,6 @@
 //! For details on the underlying AppleScript API, see:
 //! <https://moneymoney-app.com/api/>
 
-use serde;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use thiserror::Error;
 
@@ -168,10 +167,10 @@ pub fn call_action_plist<T>(action: MoneymoneyActions) -> Result<T, Error>
 where
     T: DeserializeOwned + Serialize,
 {
-    let plist_response = call_action(action).map_err(|e| Error::OsaScript(e))?;
+    let plist_response = call_action(action).map_err(Error::OsaScript)?;
 
     match plist_response {
-        Some(v) => Ok(plist::from_bytes(v.as_bytes()).map_err(|e| Error::Plist(e))?),
+        Some(v) => Ok(plist::from_bytes(v.as_bytes()).map_err(Error::Plist)?),
         None => Err(Error::EmptyPlist),
     }
 }
@@ -245,11 +244,10 @@ mod tests {
     #[test]
     fn test_create_bank_transfer_action_method_name() {
         let params = methods::create_bank_transfer::CreateBankTransferParams {
-            from_account_uuid: uuid::Uuid::nil(),
-            to_account_uuid: uuid::Uuid::nil(),
-            amount: 100.0,
-            purpose: "Test".to_string(),
-            currency: "EUR".to_string(),
+            from_account: Some("test".to_string()),
+            amount: Some(100.0),
+            purpose: Some("Test".to_string()),
+            ..Default::default()
         };
         let action = MoneymoneyActions::CreateBankTransfer(params);
         assert_eq!(action.method_name(), "createBankTransfer");

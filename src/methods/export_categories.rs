@@ -221,8 +221,8 @@ mod tests {
         let category: MoneymoneyCategory = serde_json::from_str(json).unwrap();
         assert_eq!(category.name, "Test Category");
         assert_eq!(category.currency.code(), "USD");
-        assert_eq!(category.default, true);
-        assert_eq!(category.group, false);
+        assert!(category.default);
+        assert!(!category.group);
         assert_eq!(category.indentation, 1);
         assert!(category.budget.is_none());
     }
