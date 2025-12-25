@@ -1,1 +1,23 @@
+# Build artifacts
 /target
+Cargo.lock
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Coverage reports
+/coverage
+*.profraw
+*.profdata
+
+# Claude Code artifacts
+/.claude
+
+# Test artifacts
+/tmp
+/test_output
