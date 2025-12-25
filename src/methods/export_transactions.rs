@@ -181,6 +181,7 @@ mod tests {
 
     // Integration test - requires MoneyMoney running
     #[test]
+    #[ignore]
     fn test_export_transactions() {
         let transaction_params =
             ExportTransactionsParams::new(NaiveDate::from_ymd_opt(2024, 1, 1).expect("Valid date"));
