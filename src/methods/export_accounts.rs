@@ -237,6 +237,7 @@ mod tests {
 
     // Integration test - requires MoneyMoney running
     #[test]
+    #[ignore]
     fn test_list_accounts() {
         let accounts = super::call().expect("Failed to retrieve accounts");
         assert!(!accounts.is_empty());

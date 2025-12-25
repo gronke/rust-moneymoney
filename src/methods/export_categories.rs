@@ -158,6 +158,7 @@ mod tests {
 
     // Integration test - requires MoneyMoney running
     #[test]
+    #[ignore]
     fn test_list_categories() {
         assert!(super::call().is_ok())
     }
