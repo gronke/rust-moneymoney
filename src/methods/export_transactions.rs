@@ -6,7 +6,8 @@
 //! # Example
 //!
 //! ```rust,no_run
-//! use moneymoney::{export_transactions, ExportTransactionsParams};
+//! use moneymoney::export_transactions;
+//! use moneymoney::export_transactions::ExportTransactionsParams;
 //! use chrono::NaiveDate;
 //!
 //! # fn main() -> Result<(), moneymoney::Error> {
@@ -34,7 +35,7 @@ use uuid::Uuid;
 /// # Example
 ///
 /// ```rust
-/// use moneymoney::ExportTransactionsParams;
+/// use moneymoney::export_transactions::ExportTransactionsParams;
 /// use chrono::NaiveDate;
 ///
 /// let params = ExportTransactionsParams::new(
@@ -156,7 +157,8 @@ pub struct TransactionsResponse {
 /// # Example
 ///
 /// ```rust,no_run
-/// use moneymoney::{export_transactions, ExportTransactionsParams};
+/// use moneymoney::export_transactions;
+/// use moneymoney::export_transactions::ExportTransactionsParams;
 /// use chrono::NaiveDate;
 ///
 /// # fn main() -> Result<(), moneymoney::Error> {

@@ -24,26 +24,27 @@
 //! ## Quick Start
 //!
 //! ```rust,no_run
-//! use moneymoney::{export_accounts, export_transactions, ExportTransactionsParams};
+//! use moneymoney::{export_accounts, export_transactions};
+//! use moneymoney::export_transactions::ExportTransactionsParams;
 //! use chrono::NaiveDate;
 //!
-//! # fn main() {
+//! # fn main() -> Result<(), moneymoney::Error> {
 //! // Export all accounts
-//! let accounts = export_accounts::call();
+//! let accounts = export_accounts::call()?;
 //! for account in accounts {
 //!     println!("{}: {} {}",
 //!         account.name,
 //!         account.balance.amount,
-//!         account.balance.currency
+//!         account.balance.currency.code()
 //!     );
 //! }
 //!
 //! // Export transactions from a specific date
-//! let params = ExportTransactionsParams {
-//!     from_date: NaiveDate::from_ymd_opt(2024, 1, 1).expect("valid date"),
-//!     ..Default::default()
-//! };
-//! let response = export_transactions::call(params);
+//! let params = ExportTransactionsParams::new(
+//!     NaiveDate::from_ymd_opt(2024, 1, 1).expect("valid date")
+//! );
+//! let response = export_transactions::call(params)?;
+//! # Ok(())
 //! # }
 //! ```
 //!
