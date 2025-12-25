@@ -174,3 +174,89 @@ where
         None => Err(Error::EmptyPlist),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Unit tests for Error type
+    #[test]
+    fn test_error_display_empty_plist() {
+        let error = Error::EmptyPlist;
+        assert_eq!(error.to_string(), "Received empty plist response from MoneyMoney");
+    }
+
+    #[test]
+    fn test_error_display_invalid_currency() {
+        let error = Error::InvalidCurrency("XYZ".to_string());
+        assert_eq!(error.to_string(), "Invalid currency code: XYZ");
+    }
+
+    #[test]
+    fn test_error_display_missing_parameter() {
+        let error = Error::MissingRequiredParameter("from_date");
+        assert_eq!(error.to_string(), "Missing required parameter: from_date");
+    }
+
+    #[test]
+    fn test_error_is_send_sync() {
+        fn assert_send_sync<T: Send + Sync>() {}
+        assert_send_sync::<Error>();
+    }
+
+    #[test]
+    fn test_error_from_plist() {
+        // Test that plist errors convert to Error::Plist variant
+        let invalid_plist = b"invalid plist data";
+        let result: Result<String, plist::Error> = plist::from_bytes(invalid_plist);
+
+        if let Err(plist_error) = result {
+            let error: Error = plist_error.into();
+            assert!(matches!(error, Error::Plist(_)));
+            assert!(error.to_string().contains("Plist deserialization failed"));
+        }
+    }
+
+    #[test]
+    fn test_error_debug_format() {
+        let error = Error::EmptyPlist;
+        let debug_str = format!("{:?}", error);
+        assert!(debug_str.contains("EmptyPlist"));
+    }
+
+    // Unit tests for MoneymoneyActions
+    #[test]
+    fn test_action_method_names() {
+        assert_eq!(
+            MoneymoneyActions::ExportAccounts.method_name(),
+            "exportAccounts"
+        );
+        assert_eq!(
+            MoneymoneyActions::ExportCategories.method_name(),
+            "exportCategories"
+        );
+    }
+
+    #[test]
+    fn test_export_transactions_action_method_name() {
+        let params = methods::export_transactions::ExportTransactionsParams::new(
+            chrono::NaiveDate::from_ymd_opt(2024, 1, 1).unwrap(),
+        );
+        let action = MoneymoneyActions::ExportTransactions(params);
+        assert_eq!(action.method_name(), "exportTransactions");
+    }
+
+    #[cfg(feature = "experimental")]
+    #[test]
+    fn test_create_bank_transfer_action_method_name() {
+        let params = methods::create_bank_transfer::CreateBankTransferParams {
+            from_account_uuid: uuid::Uuid::nil(),
+            to_account_uuid: uuid::Uuid::nil(),
+            amount: 100.0,
+            purpose: "Test".to_string(),
+            currency: "EUR".to_string(),
+        };
+        let action = MoneymoneyActions::CreateBankTransfer(params);
+        assert_eq!(action.method_name(), "createBankTransfer");
+    }
+}
