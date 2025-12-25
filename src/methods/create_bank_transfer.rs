@@ -39,6 +39,6 @@ pub struct CreateBankTransferParams {
     pub into: Option<String>,
 }
 
-pub fn call(params: CreateBankTransferParams) -> Vec<plist::Value> {
-    call_action_plist(MoneymoneyActions::CreateBankTransfer(params.into()))
+pub fn call(params: CreateBankTransferParams) -> Result<Vec<plist::Value>, crate::Error> {
+    call_action_plist(MoneymoneyActions::CreateBankTransfer(params))
 }
