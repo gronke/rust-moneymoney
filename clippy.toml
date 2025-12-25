@@ -1,0 +1,17 @@
+# Clippy linting configuration
+# See: https://doc.rust-lang.org/clippy/lint_configuration.html
+
+# Cognitive complexity threshold
+cognitive-complexity-threshold = 30
+
+# Documentation requirements
+missing-docs-in-crate-items = true
+
+# Allow certain pedantic lints that are too strict
+# (These would be enabled via command line: -W clippy::pedantic)
+
+# Maximum line length for string literals
+max-suggested-slice-pattern-length = 3
+
+# Single-char lifetime names
+single-char-lifetime-names-threshold = 4
