@@ -1,5 +1,6 @@
 use serde;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use thiserror::Error;
 
 mod methods;
 pub use methods::*;
@@ -26,11 +27,22 @@ impl MoneymoneyActions {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum Error {
-    OsaScript(osascript::Error),
-    Plist(plist::Error),
+    #[error("OSA script execution failed: {0}")]
+    OsaScript(#[from] osascript::Error),
+
+    #[error("Plist deserialization failed: {0}")]
+    Plist(#[from] plist::Error),
+
+    #[error("Received empty plist response from MoneyMoney")]
     EmptyPlist,
+
+    #[error("Invalid currency code: {0}")]
+    InvalidCurrency(String),
+
+    #[error("Missing required parameter: {0}")]
+    MissingRequiredParameter(&'static str),
 }
 
 #[derive(Serialize, Deserialize)]
