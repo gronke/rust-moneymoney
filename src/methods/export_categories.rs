@@ -154,9 +154,157 @@ pub fn call() -> Result<Vec<MoneymoneyCategory>, Error> {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
 
+    // Integration test - requires MoneyMoney running
     #[test]
     fn test_list_categories() {
         assert!(super::call().is_ok())
+    }
+
+    // Unit tests for MoneymoneyCategoryBudget and budget deserialization
+    #[test]
+    fn test_budget_deserialization_full() {
+        let json = r#"{
+            "uuid": "12345678-1234-1234-1234-123456789012",
+            "name": "Groceries",
+            "budget": {
+                "amount": 500.0,
+                "available": 250.0,
+                "period": "monthly"
+            },
+            "currency": "EUR",
+            "default": false,
+            "group": false,
+            "icon": "",
+            "indentation": 0
+        }"#;
+
+        let category: MoneymoneyCategory = serde_json::from_str(json).unwrap();
+        assert!(category.budget.is_some());
+        let budget = category.budget.unwrap();
+        assert_eq!(budget.amount, 500.0);
+        assert_eq!(budget.available, 250.0);
+        assert_eq!(budget.period, "monthly");
+    }
+
+    #[test]
+    fn test_budget_deserialization_empty() {
+        let json = r#"{
+            "uuid": "12345678-1234-1234-1234-123456789012",
+            "name": "No Budget Category",
+            "budget": {},
+            "currency": "EUR",
+            "default": false,
+            "group": false,
+            "icon": "",
+            "indentation": 0
+        }"#;
+
+        let category: MoneymoneyCategory = serde_json::from_str(json).unwrap();
+        assert!(category.budget.is_none());
+    }
+
+    #[test]
+    fn test_category_deserialization_without_budget() {
+        let json = r#"{
+            "uuid": "12345678-1234-1234-1234-123456789012",
+            "name": "Test Category",
+            "budget": {},
+            "currency": "USD",
+            "default": true,
+            "group": false,
+            "icon": "",
+            "indentation": 1
+        }"#;
+
+        let category: MoneymoneyCategory = serde_json::from_str(json).unwrap();
+        assert_eq!(category.name, "Test Category");
+        assert_eq!(category.currency.code(), "USD");
+        assert_eq!(category.default, true);
+        assert_eq!(category.group, false);
+        assert_eq!(category.indentation, 1);
+        assert!(category.budget.is_none());
+    }
+
+    #[test]
+    fn test_category_group() {
+        let json = r#"{
+            "uuid": "12345678-1234-1234-1234-123456789012",
+            "name": "Category Group",
+            "budget": {},
+            "currency": "EUR",
+            "default": false,
+            "group": true,
+            "icon": "",
+            "indentation": 0
+        }"#;
+
+        let category: MoneymoneyCategory = serde_json::from_str(json).unwrap();
+        assert!(category.group);
+        assert!(category.budget.is_none());
+    }
+
+    #[test]
+    fn test_budget_serialization() {
+        let budget = MoneymoneyCategoryBudget {
+            amount: 1000.0,
+            available: 750.0,
+            period: "yearly".to_string(),
+        };
+
+        let json = serde_json::to_string(&budget).unwrap();
+        assert!(json.contains("\"amount\":1000.0"));
+        assert!(json.contains("\"available\":750.0"));
+        assert!(json.contains("\"period\":\"yearly\""));
+    }
+
+    #[test]
+    fn test_category_with_various_periods() {
+        for period in &["monthly", "yearly", "quarterly", "total"] {
+            let json = format!(
+                r#"{{
+                    "uuid": "12345678-1234-1234-1234-123456789012",
+                    "name": "Test",
+                    "budget": {{
+                        "amount": 100.0,
+                        "available": 50.0,
+                        "period": "{}"
+                    }},
+                    "currency": "EUR",
+                    "default": false,
+                    "group": false,
+                    "icon": "",
+                    "indentation": 0
+                }}"#,
+                period
+            );
+
+            let category: MoneymoneyCategory = serde_json::from_str(&json).unwrap();
+            assert!(category.budget.is_some());
+            assert_eq!(category.budget.unwrap().period, *period);
+        }
+    }
+
+    #[test]
+    fn test_category_with_various_currencies() {
+        for currency_code in &["EUR", "USD", "GBP", "JPY"] {
+            let json = format!(
+                r#"{{
+                    "uuid": "12345678-1234-1234-1234-123456789012",
+                    "name": "Test",
+                    "budget": {{}},
+                    "currency": "{}",
+                    "default": false,
+                    "group": false,
+                    "icon": "",
+                    "indentation": 0
+                }}"#,
+                currency_code
+            );
+
+            let category: MoneymoneyCategory = serde_json::from_str(&json).unwrap();
+            assert_eq!(category.currency.code(), *currency_code);
+        }
     }
 }
