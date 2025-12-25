@@ -128,9 +128,7 @@ impl TryFrom<Vec<BalanceTuple>> for AccountBalance {
     type Error = crate::Error;
 
     fn try_from(tuple: Vec<BalanceTuple>) -> Result<Self, Self::Error> {
-        let balance = tuple
-            .get(0)
-            .ok_or(crate::Error::EmptyPlist)?;
+        let balance = tuple.get(0).ok_or(crate::Error::EmptyPlist)?;
 
         let currency = iso_currency::Currency::from_code(&balance.1)
             .ok_or_else(|| crate::Error::InvalidCurrency(balance.1.clone()))?;
@@ -333,10 +331,7 @@ mod tests {
 
     #[test]
     fn test_account_type_serialize() {
-        assert_eq!(
-            serde_json::to_string(&MoneymoneyAccountType::Cash).unwrap(),
-            r#""Cash""#
-        );
+        assert_eq!(serde_json::to_string(&MoneymoneyAccountType::Cash).unwrap(), r#""Cash""#);
         assert_eq!(
             serde_json::to_string(&MoneymoneyAccountType::Giro).unwrap(),
             r#""Giro account""#

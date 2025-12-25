@@ -183,7 +183,7 @@ mod tests {
     #[test]
     fn test_export_transactions() {
         let transaction_params = ExportTransactionsParams::new(
-            NaiveDate::from_ymd_opt(2024, 01, 01).expect("Valid date")
+            NaiveDate::from_ymd_opt(2024, 01, 01).expect("Valid date"),
         );
         let response = super::call(transaction_params);
         assert!(response.is_ok())
@@ -214,8 +214,7 @@ mod tests {
     #[test]
     fn test_params_builder_with_account() {
         let from = NaiveDate::from_ymd_opt(2024, 1, 1).unwrap();
-        let params = ExportTransactionsParams::new(from)
-            .from_account("DE89370400440532013000");
+        let params = ExportTransactionsParams::new(from).from_account("DE89370400440532013000");
 
         assert_eq!(params.from_account, Some("DE89370400440532013000".to_string()));
     }
@@ -223,8 +222,7 @@ mod tests {
     #[test]
     fn test_params_builder_with_category() {
         let from = NaiveDate::from_ymd_opt(2024, 1, 1).unwrap();
-        let params = ExportTransactionsParams::new(from)
-            .from_category("Groceries");
+        let params = ExportTransactionsParams::new(from).from_category("Groceries");
 
         assert_eq!(params.from_category, Some("Groceries".to_string()));
     }
@@ -251,7 +249,7 @@ mod tests {
 
         let json = serde_json::to_string(&params).unwrap();
         assert!(json.contains("\"fromDate\":\"2024-01-01\""));
-        assert!(!json.contains("toDate"));  // None values skipped
+        assert!(!json.contains("toDate")); // None values skipped
     }
 
     #[test]
