@@ -19,24 +19,5 @@ tab_spaces = 4
 # Function call formatting
 fn_call_width = 80
 
-# Struct formatting
-struct_field_align_threshold = 20
-
-# Import formatting
-imports_granularity = "Crate"
-group_imports = "StdExternalCrate"
-
 # Use field init shorthand if possible
 use_field_init_shorthand = true
-
-# Format string literals
-format_strings = true
-
-# Wrap comments at max_width
-wrap_comments = true
-
-# Normalize doc comments to ///
-normalize_doc_attributes = true
-
-# Format generated files
-format_generated_files = false

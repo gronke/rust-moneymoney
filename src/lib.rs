@@ -228,14 +228,8 @@ mod tests {
     // Unit tests for MoneymoneyActions
     #[test]
     fn test_action_method_names() {
-        assert_eq!(
-            MoneymoneyActions::ExportAccounts.method_name(),
-            "exportAccounts"
-        );
-        assert_eq!(
-            MoneymoneyActions::ExportCategories.method_name(),
-            "exportCategories"
-        );
+        assert_eq!(MoneymoneyActions::ExportAccounts.method_name(), "exportAccounts");
+        assert_eq!(MoneymoneyActions::ExportCategories.method_name(), "exportCategories");
     }
 
     #[test]
