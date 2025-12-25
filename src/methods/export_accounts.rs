@@ -1,18 +1,64 @@
+//! Export accounts from MoneyMoney.
+//!
+//! This module provides functionality to retrieve all accounts with their balances
+//! and metadata from the MoneyMoney application.
+//!
+//! # Example
+//!
+//! ```rust,no_run
+//! use moneymoney::export_accounts;
+//!
+//! # fn main() -> Result<(), moneymoney::Error> {
+//! let accounts = export_accounts::call()?;
+//! for account in accounts.iter().filter(|a| !a.group) {
+//!     println!("{}: {} {}",
+//!         account.name,
+//!         account.balance.amount,
+//!         account.balance.currency
+//!     );
+//! }
+//! # Ok(())
+//! # }
+//! ```
+
 use crate::{call_action_plist, MoneymoneyActions};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use uuid::Uuid;
 
+/// The type of a MoneyMoney account.
+///
+/// This enum represents the various account types supported by MoneyMoney.
+/// It handles both English and German localized strings during deserialization.
+///
+/// # Serialization
+///
+/// When serializing, English strings are used (e.g., "Cash", "Giro account").
+///
+/// # Deserialization
+///
+/// Both English and German strings are supported (e.g., "Cash"/"Bargeld",
+/// "Giro account"/"Girokonto"). Unknown account type strings are captured
+/// as [`MoneymoneyAccountType::Custom`].
 #[derive(Debug)]
 pub enum MoneymoneyAccountType {
+    /// Account group (container for organizing other accounts).
     Group,
+    /// Checking/Giro account.
     Giro,
+    /// Savings account.
     Savings,
+    /// Fixed term deposit account.
     FixedTermDeposit,
+    /// Loan account.
     Loan,
+    /// Credit card account.
     CreditCard,
+    /// Cash account.
     Cash,
+    /// Other account type.
     Other,
+    /// Custom account type with a user-defined string.
     Custom(String),
 }
 
@@ -56,10 +102,22 @@ impl<'de> Deserialize<'de> for MoneymoneyAccountType {
     }
 }
 
+/// The balance of an account with amount and currency.
+///
+/// # Fields
+///
+/// * `amount` - The account balance as a floating-point number
+/// * `currency` - The ISO 4217 currency code (e.g., EUR, USD)
+///
+/// # Errors
+///
+/// Deserialization fails if the currency code is invalid, returning [`crate::Error::InvalidCurrency`].
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(try_from = "Vec<BalanceTuple>")]
 pub struct AccountBalance {
+    /// The balance amount.
     pub amount: f64,
+    /// The currency of the balance.
     pub currency: iso_currency::Currency,
 }
 
@@ -84,25 +142,93 @@ impl TryFrom<Vec<BalanceTuple>> for AccountBalance {
     }
 }
 
+/// A MoneyMoney account with all its metadata.
+///
+/// This struct represents a complete account record from MoneyMoney, including
+/// balance, type, timestamps, and organizational information.
+///
+/// # Fields
+///
+/// * `account_number` - The account number
+/// * `attributes` - Custom attributes dictionary
+/// * `balance` - Current balance with currency
+/// * `bank_code` - Bank identification code (BLZ/BIC)
+/// * `currency` - Account currency code
+/// * `group` - Whether this is an account group
+/// * `icon` - Account icon as binary data
+/// * `indentation` - Indentation level for display hierarchy
+/// * `name` - Account display name
+/// * `owner` - Account owner name
+/// * `portfolio` - Whether this is a portfolio/investment account
+/// * `refresh_timestamp` - Last synchronization timestamp
+/// * `type` - The account type (giro, savings, credit card, etc.)
+/// * `uuid` - Unique identifier for the account
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct MoneymoneyAccount {
+    /// The account number.
     pub account_number: String,
+    /// Custom account attributes.
     pub attributes: plist::Dictionary,
+    /// Current account balance with currency.
     pub balance: AccountBalance,
+    /// Bank identification code.
     pub bank_code: String,
+    /// Account currency code.
     pub currency: String,
+    /// Whether this is an account group.
     pub group: bool,
+    /// Account icon as binary data.
     pub icon: plist::Data,
+    /// Display indentation level.
     pub indentation: u8,
+    /// Account display name.
     pub name: String,
+    /// Account owner name.
     pub owner: String,
+    /// Whether this is a portfolio account.
     pub portfolio: bool,
+    /// Last refresh timestamp.
     pub refresh_timestamp: DateTime<Utc>,
+    /// Account type.
     pub r#type: MoneymoneyAccountType,
+    /// Unique account identifier.
     pub uuid: Uuid,
 }
 
+/// Export all accounts from MoneyMoney.
+///
+/// Retrieves all accounts including account groups and their current balances.
+///
+/// # Returns
+///
+/// Returns a `Result` containing a vector of [`MoneymoneyAccount`] on success.
+///
+/// # Errors
+///
+/// Returns [`enum@crate::Error`] if:
+/// - MoneyMoney is not running
+/// - The OSA script execution fails
+/// - The response cannot be parsed
+/// - Invalid currency codes are encountered
+///
+/// # Example
+///
+/// ```rust,no_run
+/// use moneymoney::export_accounts;
+///
+/// # fn main() -> Result<(), moneymoney::Error> {
+/// let accounts = export_accounts::call()?;
+/// for account in accounts.iter().filter(|a| !a.group) {
+///     println!("{}: {} {}",
+///         account.name,
+///         account.balance.amount,
+///         account.balance.currency
+///     );
+/// }
+/// # Ok(())
+/// # }
+/// ```
 pub fn call() -> Result<Vec<MoneymoneyAccount>, crate::Error> {
     call_action_plist(MoneymoneyActions::ExportAccounts)
 }
