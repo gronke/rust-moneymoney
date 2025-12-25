@@ -1,3 +1,75 @@
+//! # MoneyMoney Rust Interface
+//!
+//! A safe, ergonomic Rust interface to the [MoneyMoney](https://moneymoney-app.com/)
+//! macOS application via AppleScript.
+//!
+//! ## Overview
+//!
+//! This library provides typed Rust bindings to MoneyMoney's AppleScript API, enabling
+//! programmatic access to your financial data on macOS. All operations communicate with
+//! the MoneyMoney application via OSA (Open Scripting Architecture).
+//!
+//! ## Requirements
+//!
+//! - **macOS**: MoneyMoney is a macOS-only application
+//! - **MoneyMoney app**: Must be installed and running
+//! - **Permissions**: Appropriate accessibility permissions for script execution
+//!
+//! ## Features
+//!
+//! - **Type-safe API**: All data structures use proper Rust types
+//! - **Serde integration**: All types support serialization/deserialization
+//! - **Zero unsafe code**: Pure safe Rust implementation
+//!
+//! ## Quick Start
+//!
+//! ```rust,no_run
+//! use moneymoney::{export_accounts, export_transactions, ExportTransactionsParams};
+//! use chrono::NaiveDate;
+//!
+//! # fn main() {
+//! // Export all accounts
+//! let accounts = export_accounts::call();
+//! for account in accounts {
+//!     println!("{}: {} {}",
+//!         account.name,
+//!         account.balance.amount,
+//!         account.balance.currency
+//!     );
+//! }
+//!
+//! // Export transactions from a specific date
+//! let params = ExportTransactionsParams {
+//!     from_date: NaiveDate::from_ymd_opt(2024, 1, 1).expect("valid date"),
+//!     ..Default::default()
+//! };
+//! let response = export_transactions::call(params);
+//! # }
+//! ```
+//!
+//! ## Available Operations
+//!
+//! ### Accounts
+//! - [`export_accounts::call()`] - Export all accounts with balances and metadata
+//!
+//! ### Categories
+//! - [`export_categories::call()`] - Export all categories with budgets
+//!
+//! ### Transactions
+//! - [`export_transactions::call()`] - Export transactions with flexible filtering
+//!
+//! ### Transfers (Experimental)
+//! - `create_bank_transfer::call()` - Create bank transfers (requires `experimental` feature)
+//!
+//! ## Feature Flags
+//!
+//! - `experimental` - Enables experimental APIs like `create_bank_transfer` that may change
+//!
+//! ## MoneyMoney API Documentation
+//!
+//! For details on the underlying AppleScript API, see:
+//! <https://moneymoney-app.com/api/>
+
 use serde;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use thiserror::Error;
