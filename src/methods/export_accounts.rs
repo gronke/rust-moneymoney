@@ -57,7 +57,7 @@ impl<'de> Deserialize<'de> for MoneymoneyAccountType {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(from = "Vec<BalanceTuple>")]
+#[serde(try_from = "Vec<BalanceTuple>")]
 pub struct AccountBalance {
     pub amount: f64,
     pub currency: iso_currency::Currency,
@@ -66,13 +66,21 @@ pub struct AccountBalance {
 #[derive(Debug, Deserialize)]
 struct BalanceTuple(f64, String);
 
-impl From<Vec<BalanceTuple>> for AccountBalance {
-    fn from(tuple: Vec<BalanceTuple>) -> Self {
-        let balance = &tuple[0];
-        AccountBalance {
+impl TryFrom<Vec<BalanceTuple>> for AccountBalance {
+    type Error = crate::Error;
+
+    fn try_from(tuple: Vec<BalanceTuple>) -> Result<Self, Self::Error> {
+        let balance = tuple
+            .get(0)
+            .ok_or(crate::Error::EmptyPlist)?;
+
+        let currency = iso_currency::Currency::from_code(&balance.1)
+            .ok_or_else(|| crate::Error::InvalidCurrency(balance.1.clone()))?;
+
+        Ok(AccountBalance {
             amount: balance.0,
-            currency: iso_currency::Currency::from_code(&balance.1).unwrap(),
-        }
+            currency,
+        })
     }
 }
 
