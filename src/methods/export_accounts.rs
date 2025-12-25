@@ -28,7 +28,7 @@ impl Serialize for MoneymoneyAccountType {
             MoneymoneyAccountType::FixedTermDeposit => "Fixed term deposit",
             MoneymoneyAccountType::Loan => "Loan account",
             MoneymoneyAccountType::CreditCard => "Credit card",
-            MoneymoneyAccountType::Cash => todo!(),
+            MoneymoneyAccountType::Cash => "Cash", // Bargeld (matches AccountTypeCash)
             MoneymoneyAccountType::Other => "Other",
             MoneymoneyAccountType::Custom(value) => value,
         };
