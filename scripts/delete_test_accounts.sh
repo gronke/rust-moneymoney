@@ -49,7 +49,7 @@ tell application "MoneyMoney"
     activate
 end tell
 
-delay 0.5
+delay 0.1
 
 tell application "System Events"
     tell process "MoneyMoney"
@@ -60,7 +60,7 @@ tell application "System Events"
                     set txt to value of text field 1 of r
                     if txt contains "${account_name}" then
                         click r
-                        delay 0.3
+                        delay 0.05
                         exit repeat
                     end if
                 end try
@@ -69,7 +69,7 @@ tell application "System Events"
     end tell
 end tell
 
-delay 0.5
+delay 0.1
 
 tell application "System Events"
     tell process "MoneyMoney"
@@ -78,7 +78,7 @@ tell application "System Events"
     end tell
 end tell
 
-delay 1
+delay 0.2
 
 tell application "System Events"
     tell process "MoneyMoney"
@@ -92,7 +92,7 @@ tell application "System Events"
     end tell
 end tell
 
-delay 0.5
+delay 0.1
 EOF
 }
 
@@ -108,14 +108,14 @@ echo "$TEST_ACCOUNTS" | while read -r account; do
         else
             echo -e "${RED}✗${NC}"
         fi
-        sleep 1
+        sleep 0.15
     fi
 done
 
 # Verify cleanup
 echo ""
 echo "Verifying cleanup..."
-sleep 1
+sleep 0.15
 
 REMAINING=$(osascript -e 'tell application "MoneyMoney" to export accounts' 2>/dev/null | grep -c "test-" 2>/dev/null || true)
 REMAINING=${REMAINING:-0}
