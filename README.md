@@ -18,7 +18,6 @@ A safe, ergonomic Rust interface to the [MoneyMoney](https://moneymoney-app.com/
 
 - **macOS**: MoneyMoney is a macOS-only application
 - **MoneyMoney app**: Must be installed and running
-- **Rust**: 1.70 or later
 
 ## Installation
 
