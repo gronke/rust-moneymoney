@@ -31,7 +31,7 @@
 //! # }
 //! ```
 
-use crate::{call_action, MoneymoneyActions};
+use crate::{call_action_void, MoneymoneyActions};
 use serde::{Deserialize, Serialize};
 
 /// Parameters for modifying an existing transaction.
@@ -205,8 +205,7 @@ impl SetTransactionParams {
 /// # }
 /// ```
 pub fn call(params: SetTransactionParams) -> Result<(), crate::Error> {
-    call_action(MoneymoneyActions::SetTransaction(params)).map_err(crate::Error::OsaScript)?;
-    Ok(())
+    call_action_void(MoneymoneyActions::SetTransaction(params)).map_err(crate::Error::OsaScript)
 }
 
 #[cfg(test)]
