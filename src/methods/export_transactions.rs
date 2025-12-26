@@ -6,7 +6,7 @@
 //! # Example
 //!
 //! ```rust,no_run
-//! use moneymoney::export_transactions;
+//!
 //! use moneymoney::export_transactions::ExportTransactionsParams;
 //! use chrono::NaiveDate;
 //!
@@ -16,7 +16,7 @@
 //!     NaiveDate::from_ymd_opt(2024, 1, 1).expect("valid date")
 //! ).to_date(NaiveDate::from_ymd_opt(2024, 12, 31).expect("valid date"));
 //!
-//! let response = export_transactions::call(params)?;
+//! let response = moneymoney::export_transactions(params)?;
 //! println!("Found {} transactions", response.transactions.len());
 //! # Ok(())
 //! # }
@@ -160,7 +160,7 @@ pub struct TransactionsResponse {
 /// # Example
 ///
 /// ```rust,no_run
-/// use moneymoney::export_transactions;
+///
 /// use moneymoney::export_transactions::ExportTransactionsParams;
 /// use chrono::NaiveDate;
 ///
@@ -168,12 +168,14 @@ pub struct TransactionsResponse {
 /// let params = ExportTransactionsParams::new(
 ///     NaiveDate::from_ymd_opt(2024, 1, 1).expect("valid date")
 /// );
-/// let response = export_transactions::call(params)?;
+/// let response = moneymoney::export_transactions(params)?;
 /// println!("Found {} transactions", response.transactions.len());
 /// # Ok(())
 /// # }
 /// ```
-pub fn call(params: ExportTransactionsParams) -> Result<TransactionsResponse, Error> {
+pub fn export_transactions(
+    params: ExportTransactionsParams,
+) -> Result<TransactionsResponse, Error> {
     call_action_plist(MoneymoneyActions::ExportTransactions(params))
 }
 
@@ -188,7 +190,7 @@ mod tests {
     fn test_export_transactions() {
         let transaction_params =
             ExportTransactionsParams::new(NaiveDate::from_ymd_opt(2024, 1, 1).expect("Valid date"));
-        let response = super::call(transaction_params);
+        let response = super::export_transactions(transaction_params);
         assert!(response.is_ok())
     }
 

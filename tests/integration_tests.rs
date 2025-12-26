@@ -12,17 +12,18 @@ use moneymoney::{export_accounts, export_categories, export_transactions};
 #[ignore]
 fn test_complete_workflow() {
     // 1. Export accounts
-    let accounts = export_accounts::call().expect("Failed to export accounts");
+    let accounts = export_accounts::export_accounts().expect("Failed to export accounts");
     assert!(!accounts.is_empty(), "Should have at least one account");
 
     // 2. Export categories
-    let categories = export_categories::call().expect("Failed to export categories");
+    let categories = export_categories::export_categories().expect("Failed to export categories");
     assert!(!categories.is_empty(), "Should have at least one category");
 
     // 3. Export transactions
     let from_date = NaiveDate::from_ymd_opt(2024, 1, 1).expect("Valid date");
     let params = ExportTransactionsParams::new(from_date);
-    let response = export_transactions::call(params).expect("Failed to export transactions");
+    let response =
+        export_transactions::export_transactions(params).expect("Failed to export transactions");
 
     // Verify response structure
     assert!(!response.creator.is_empty(), "Creator should not be empty");
@@ -33,7 +34,7 @@ fn test_complete_workflow() {
 #[test]
 #[ignore]
 fn test_account_hierarchy() {
-    let accounts = export_accounts::call().expect("Failed to export accounts");
+    let accounts = export_accounts::export_accounts().expect("Failed to export accounts");
 
     // Check for account groups
     let groups: Vec<_> = accounts.iter().filter(|a| a.group).collect();
@@ -60,7 +61,7 @@ fn test_account_hierarchy() {
 #[test]
 #[ignore]
 fn test_category_hierarchy() {
-    let categories = export_categories::call().expect("Failed to export categories");
+    let categories = export_categories::export_categories().expect("Failed to export categories");
 
     let groups: Vec<_> = categories.iter().filter(|c| c.group).collect();
     let non_groups: Vec<_> = categories.iter().filter(|c| !c.group).collect();
@@ -92,7 +93,8 @@ fn test_transaction_date_filtering() {
     let to_date = NaiveDate::from_ymd_opt(2024, 12, 31).expect("Valid date");
 
     let params = ExportTransactionsParams::new(from_date).to_date(to_date);
-    let response = export_transactions::call(params).expect("Failed to export transactions");
+    let response =
+        export_transactions::export_transactions(params).expect("Failed to export transactions");
 
     // Verify all transactions are within the date range
     for transaction in &response.transactions {
@@ -114,7 +116,7 @@ fn test_transaction_date_filtering() {
 #[ignore]
 fn test_transaction_account_filtering() {
     // First, get all accounts
-    let accounts = export_accounts::call().expect("Failed to export accounts");
+    let accounts = export_accounts::export_accounts().expect("Failed to export accounts");
 
     // Find a non-group account
     if let Some(account) = accounts.iter().find(|a| !a.group) {
@@ -122,7 +124,8 @@ fn test_transaction_account_filtering() {
         let params =
             ExportTransactionsParams::new(from_date).from_account(account.uuid.to_string());
 
-        let response = export_transactions::call(params).expect("Failed to export transactions");
+        let response = export_transactions::export_transactions(params)
+            .expect("Failed to export transactions");
 
         // Verify all transactions belong to the specified account
         for transaction in &response.transactions {
@@ -147,14 +150,15 @@ fn test_transaction_account_filtering() {
 #[ignore]
 fn test_transaction_category_filtering() {
     // First, get all categories
-    let categories = export_categories::call().expect("Failed to export categories");
+    let categories = export_categories::export_categories().expect("Failed to export categories");
 
     // Find a non-group category
     if let Some(category) = categories.iter().find(|c| !c.group) {
         let from_date = NaiveDate::from_ymd_opt(2024, 1, 1).expect("Valid date");
         let params = ExportTransactionsParams::new(from_date).from_category(category.name.clone());
 
-        let response = export_transactions::call(params).expect("Failed to export transactions");
+        let response = export_transactions::export_transactions(params)
+            .expect("Failed to export transactions");
 
         // Verify all transactions belong to the specified category
         for transaction in &response.transactions {
@@ -180,7 +184,8 @@ fn test_transaction_category_filtering() {
 fn test_transaction_data_validity() {
     let from_date = NaiveDate::from_ymd_opt(2024, 1, 1).expect("Valid date");
     let params = ExportTransactionsParams::new(from_date);
-    let response = export_transactions::call(params).expect("Failed to export transactions");
+    let response =
+        export_transactions::export_transactions(params).expect("Failed to export transactions");
 
     for transaction in &response.transactions {
         // Verify required fields are populated
@@ -208,7 +213,7 @@ fn test_transaction_data_validity() {
 #[test]
 #[ignore]
 fn test_account_balance_consistency() {
-    let accounts = export_accounts::call().expect("Failed to export accounts");
+    let accounts = export_accounts::export_accounts().expect("Failed to export accounts");
 
     for account in accounts.iter().filter(|a| !a.group) {
         // Verify balance currency matches account currency
@@ -235,8 +240,8 @@ fn test_account_balance_consistency() {
 #[ignore]
 fn test_combined_filtering() {
     // Get accounts and categories
-    let accounts = export_accounts::call().expect("Failed to export accounts");
-    let categories = export_categories::call().expect("Failed to export categories");
+    let accounts = export_accounts::export_accounts().expect("Failed to export accounts");
+    let categories = export_categories::export_categories().expect("Failed to export categories");
 
     if let (Some(account), Some(category)) =
         (accounts.iter().find(|a| !a.group), categories.iter().find(|c| !c.group))
@@ -249,7 +254,8 @@ fn test_combined_filtering() {
             .from_account(account.uuid.to_string())
             .from_category(category.name.clone());
 
-        let response = export_transactions::call(params).expect("Failed to export transactions");
+        let response = export_transactions::export_transactions(params)
+            .expect("Failed to export transactions");
 
         // Verify all filters are applied
         for transaction in &response.transactions {

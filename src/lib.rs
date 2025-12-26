@@ -24,13 +24,12 @@
 //! ## Quick Start
 //!
 //! ```rust,no_run
-//! use moneymoney::{export_accounts, export_transactions};
 //! use moneymoney::export_transactions::ExportTransactionsParams;
 //! use chrono::NaiveDate;
 //!
 //! # fn main() -> Result<(), moneymoney::Error> {
 //! // Export all accounts
-//! let accounts = export_accounts::call()?;
+//! let accounts = moneymoney::export_accounts()?;
 //! for account in accounts {
 //!     println!("{}: {} {}",
 //!         account.name,
@@ -43,7 +42,7 @@
 //! let params = ExportTransactionsParams::new(
 //!     NaiveDate::from_ymd_opt(2024, 1, 1).expect("valid date")
 //! );
-//! let response = export_transactions::call(params)?;
+//! let response = moneymoney::export_transactions(params)?;
 //! # Ok(())
 //! # }
 //! ```
@@ -51,18 +50,18 @@
 //! ## Available Operations
 //!
 //! ### Export Operations
-//! - [`export_accounts::call()`] - Export all accounts with balances and metadata
-//! - [`export_categories::call()`] - Export all categories with budgets
-//! - [`export_transactions::call()`] - Export transactions with flexible filtering
-//! - [`export_portfolio::call()`] - Export securities and portfolio holdings
+//! - [`export_accounts()`] - Export all accounts with balances and metadata
+//! - [`export_categories()`] - Export all categories with budgets
+//! - [`export_transactions()`] - Export transactions with flexible filtering
+//! - [`export_portfolio()`] - Export securities and portfolio holdings
 //!
 //! ### Transaction Management
-//! - [`add_transaction::call()`] - Add transactions to offline accounts
-//! - [`set_transaction::call()`] - Modify existing transaction properties (checkmark, category, comment)
+//! - [`add_transaction()`] - Add transactions to offline accounts
+//! - [`set_transaction()`] - Modify existing transaction properties (checkmark, category, comment)
 //!
 //! ### Payment Operations (Experimental)
-//! - `create_bank_transfer::call()` - Create SEPA bank transfers (requires `experimental` feature)
-//! - `create_direct_debit::call()` - Create SEPA direct debit orders (requires `experimental` feature)
+//! - [`create_bank_transfer()`] - Create SEPA bank transfers (requires `experimental` feature)
+//! - [`create_direct_debit()`] - Create SEPA direct debit orders (requires `experimental` feature)
 //!
 //! ## Feature Flags
 //!

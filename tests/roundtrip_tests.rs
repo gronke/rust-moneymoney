@@ -73,7 +73,7 @@ fn test_roundtrip_add_read_modify_transactions() {
     }
 
     let fixtures = load_fixtures();
-    let accounts = export_accounts::call().expect("Failed to export accounts");
+    let accounts = export_accounts::export_accounts().expect("Failed to export accounts");
 
     let test_accounts: Vec<_> = accounts
         .iter()
@@ -100,7 +100,7 @@ fn test_roundtrip_add_read_modify_transactions() {
             params = params.category(cat);
         }
 
-        match add_transaction::call(params) {
+        match add_transaction::add_transaction(params) {
             Ok(_) => println!("  ✓ Added: {} → {} {}", fixture.to, fixture.amount, fixture.account),
             Err(e) => eprintln!("  ✗ Failed to add transaction: {}", e),
         }
@@ -110,7 +110,8 @@ fn test_roundtrip_add_read_modify_transactions() {
     println!("\nStep 3: Exporting transactions to verify...");
     let from_date = NaiveDate::from_ymd_opt(2024, 12, 1).expect("Valid date");
     let params = ExportTransactionsParams::new(from_date);
-    let response = export_transactions::call(params).expect("Failed to export transactions");
+    let response =
+        export_transactions::export_transactions(params).expect("Failed to export transactions");
 
     let test_transactions: Vec<_> = response
         .transactions
@@ -142,7 +143,7 @@ fn test_roundtrip_add_read_modify_transactions() {
             .checkmark("on")
             .comment("Automated test - roundtrip verification");
 
-        match set_transaction::call(params) {
+        match set_transaction::set_transaction(params) {
             Ok(_) => {
                 println!("  ✓ Modified transaction ID: {}", transaction.id);
                 modified_count += 1;
@@ -155,8 +156,9 @@ fn test_roundtrip_add_read_modify_transactions() {
 
     // Step 5: Verify modifications
     println!("\nStep 5: Verifying modifications...");
-    let response = export_transactions::call(ExportTransactionsParams::new(from_date))
-        .expect("Failed to export transactions");
+    let response =
+        export_transactions::export_transactions(ExportTransactionsParams::new(from_date))
+            .expect("Failed to export transactions");
 
     let verified_count = response
         .transactions
@@ -186,12 +188,13 @@ fn test_add_and_read_specific_transaction() {
     let params = AddTransactionParams::new("test-cash", date, unique_merchant, -99.99)
         .purpose("Roundtrip test transaction");
 
-    add_transaction::call(params).expect("Failed to add transaction");
+    add_transaction::add_transaction(params).expect("Failed to add transaction");
     println!("✓ Added unique test transaction");
 
     // Read it back
     let export_params = ExportTransactionsParams::new(date);
-    let response = export_transactions::call(export_params).expect("Failed to export");
+    let response =
+        export_transactions::export_transactions(export_params).expect("Failed to export");
 
     let found = response
         .transactions
@@ -212,10 +215,10 @@ fn test_modify_transaction_category() {
     // Get a recent transaction from a test account
     let from_date = NaiveDate::from_ymd_opt(2024, 12, 1).expect("Valid date");
     let params = ExportTransactionsParams::new(from_date);
-    let response = export_transactions::call(params).expect("Failed to export");
+    let response = export_transactions::export_transactions(params).expect("Failed to export");
 
     // Find a test account transaction
-    let accounts = export_accounts::call().expect("Failed to get accounts");
+    let accounts = export_accounts::export_accounts().expect("Failed to get accounts");
     let test_account_uuids: Vec<_> = accounts
         .iter()
         .filter(|a| a.name.starts_with("test-"))
@@ -234,12 +237,13 @@ fn test_modify_transaction_category() {
         let params =
             SetTransactionParams::new(transaction.id).comment("Modified by roundtrip test");
 
-        set_transaction::call(params).expect("Failed to modify");
+        set_transaction::set_transaction(params).expect("Failed to modify");
         println!("✓ Modified transaction");
 
         // Verify the change
-        let response = export_transactions::call(ExportTransactionsParams::new(from_date))
-            .expect("Failed to export");
+        let response =
+            export_transactions::export_transactions(ExportTransactionsParams::new(from_date))
+                .expect("Failed to export");
 
         if let Some(modified) = response
             .transactions
@@ -265,10 +269,10 @@ fn test_bulk_categorization() {
 
     let from_date = NaiveDate::from_ymd_opt(2024, 12, 1).expect("Valid date");
     let params = ExportTransactionsParams::new(from_date);
-    let response = export_transactions::call(params).expect("Failed to export");
+    let response = export_transactions::export_transactions(params).expect("Failed to export");
 
     // Find all unchecked transactions in test accounts
-    let accounts = export_accounts::call().expect("Failed to get accounts");
+    let accounts = export_accounts::export_accounts().expect("Failed to get accounts");
     let test_account_uuids: Vec<_> = accounts
         .iter()
         .filter(|a| a.name.starts_with("test-"))
@@ -302,7 +306,7 @@ fn test_bulk_categorization() {
             .checkmark("on")
             .comment(format!("Auto-labeled as: {}", label));
 
-        match set_transaction::call(params) {
+        match set_transaction::set_transaction(params) {
             Ok(_) => println!("  ✓ Labeled {} as {}", transaction.name, label),
             Err(e) => eprintln!("  ✗ Failed: {}", e),
         }
@@ -320,9 +324,10 @@ fn test_modification_persistence() {
     let from_date = NaiveDate::from_ymd_opt(2024, 12, 1).expect("Valid date");
 
     // Get a test transaction
-    let response = export_transactions::call(ExportTransactionsParams::new(from_date))
-        .expect("Failed to export");
-    let accounts = export_accounts::call().expect("Failed to get accounts");
+    let response =
+        export_transactions::export_transactions(ExportTransactionsParams::new(from_date))
+            .expect("Failed to export");
+    let accounts = export_accounts::export_accounts().expect("Failed to get accounts");
     let test_account_uuids: Vec<_> = accounts
         .iter()
         .filter(|a| a.name.starts_with("test-"))
@@ -338,14 +343,15 @@ fn test_modification_persistence() {
 
         // Modify it
         let params = SetTransactionParams::new(transaction.id).comment(&unique_comment);
-        set_transaction::call(params).expect("Failed to modify");
+        set_transaction::set_transaction(params).expect("Failed to modify");
         println!("✓ Added unique comment");
 
         // Read it back and verify comment was set
         // Note: Other parallel tests may modify this same transaction, so we just
         // verify the comment contains something (not necessarily our unique comment)
-        let response = export_transactions::call(ExportTransactionsParams::new(from_date))
-            .expect("Failed to export");
+        let response =
+            export_transactions::export_transactions(ExportTransactionsParams::new(from_date))
+                .expect("Failed to export");
 
         if let Some(found) = response
             .transactions

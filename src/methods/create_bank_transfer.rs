@@ -28,7 +28,7 @@
 //!     purpose: Some("Invoice payment".to_string()),
 //!     ..Default::default()
 //! };
-//! let result = create_bank_transfer::call(params)?;
+//! let result = moneymoney::create_bank_transfer(params)?;
 //! # Ok(())
 //! # }
 //! # }
@@ -151,11 +151,13 @@ pub struct CreateBankTransferParams {
 ///     into: Some("outbox".to_string()), // Save to outbox without confirmation
 ///     ..Default::default()
 /// };
-/// let result = create_bank_transfer::call(params)?;
+/// let result = moneymoney::create_bank_transfer(params)?;
 /// # Ok(())
 /// # }
 /// # }
 /// ```
-pub fn call(params: CreateBankTransferParams) -> Result<Vec<plist::Value>, crate::Error> {
+pub fn create_bank_transfer(
+    params: CreateBankTransferParams,
+) -> Result<Vec<plist::Value>, crate::Error> {
     call_action_plist(MoneymoneyActions::CreateBankTransfer(params))
 }

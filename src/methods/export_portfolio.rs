@@ -10,7 +10,7 @@
 //!
 //! # fn main() -> Result<(), moneymoney::Error> {
 //! // Export entire portfolio
-//! let portfolio = export_portfolio::call(ExportPortfolioParams::default())?;
+//! let portfolio = moneymoney::export_portfolio(ExportPortfolioParams::default())?;
 //! for holding in &portfolio.securities {
 //!     println!("{}: {} shares", holding.name, holding.quantity);
 //! }
@@ -18,7 +18,7 @@
 //! // Export portfolio for a specific account
 //! let params = ExportPortfolioParams::default()
 //!     .from_account("Investment Account");
-//! let portfolio = export_portfolio::call(params)?;
+//! let portfolio = moneymoney::export_portfolio(params)?;
 //! # Ok(())
 //! # }
 //! ```
@@ -188,7 +188,7 @@ pub struct Security {
 ///
 /// # fn main() -> Result<(), moneymoney::Error> {
 /// // Export entire portfolio
-/// let portfolio = export_portfolio::call(ExportPortfolioParams::default())?;
+/// let portfolio = moneymoney::export_portfolio(ExportPortfolioParams::default())?;
 ///
 /// for holding in &portfolio.securities {
 ///     println!("{}: {} shares @ {} {} = {} {}",
@@ -204,7 +204,9 @@ pub struct Security {
 /// # Ok(())
 /// # }
 /// ```
-pub fn call(params: ExportPortfolioParams) -> Result<ExportPortfolioResponse, crate::Error> {
+pub fn export_portfolio(
+    params: ExportPortfolioParams,
+) -> Result<ExportPortfolioResponse, crate::Error> {
     call_action_plist(MoneymoneyActions::ExportPortfolio(params))
 }
 
@@ -286,7 +288,7 @@ mod tests {
     #[ignore]
     fn test_export_portfolio() {
         let params = ExportPortfolioParams::default();
-        let result = call(params);
+        let result = export_portfolio(params);
         assert!(result.is_ok());
     }
 }
