@@ -22,7 +22,7 @@
 //! .purpose("Morning coffee")
 //! .category("Food & Drinks");
 //!
-//! add_transaction::call(params)?;
+//! moneymoney::add_transaction(params)?;
 //! # Ok(())
 //! # }
 //! ```
@@ -196,12 +196,12 @@ impl AddTransactionParams {
 /// .purpose("Dinner with friends")
 /// .category("Food & Drinks\\Restaurants");
 ///
-/// add_transaction::call(params)?;
+/// moneymoney::add_transaction(params)?;
 /// println!("Transaction added successfully!");
 /// # Ok(())
 /// # }
 /// ```
-pub fn call(params: AddTransactionParams) -> Result<(), crate::Error> {
+pub fn add_transaction(params: AddTransactionParams) -> Result<(), crate::Error> {
     call_action_void(MoneymoneyActions::AddTransaction(params)).map_err(crate::Error::OsaScript)
 }
 

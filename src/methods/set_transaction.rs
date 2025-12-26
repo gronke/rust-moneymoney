@@ -16,17 +16,17 @@
 //! // Mark transaction as reviewed
 //! let params = SetTransactionParams::new(12345)
 //!     .checkmark("on");
-//! set_transaction::call(params)?;
+//! moneymoney::set_transaction(params)?;
 //!
 //! // Assign category
 //! let params = SetTransactionParams::new(12345)
 //!     .category("Food & Drinks");
-//! set_transaction::call(params)?;
+//! moneymoney::set_transaction(params)?;
 //!
 //! // Add comment
 //! let params = SetTransactionParams::new(12345)
 //!     .comment("Business expense - reimbursable");
-//! set_transaction::call(params)?;
+//! moneymoney::set_transaction(params)?;
 //! # Ok(())
 //! # }
 //! ```
@@ -190,7 +190,7 @@ impl SetTransactionParams {
 /// // First, get transaction IDs
 /// let from_date = NaiveDate::from_ymd_opt(2024, 12, 1).unwrap();
 /// let params = ExportTransactionsParams::new(from_date);
-/// let response = export_transactions::call(params)?;
+/// let response = moneymoney::export_transactions(params)?;
 ///
 /// // Then modify transactions
 /// for transaction in &response.transactions {
@@ -198,13 +198,13 @@ impl SetTransactionParams {
 ///         let params = SetTransactionParams::new(transaction.id)
 ///             .category("Groceries")
 ///             .checkmark("on");
-///         set_transaction::call(params)?;
+///         moneymoney::set_transaction(params)?;
 ///     }
 /// }
 /// # Ok(())
 /// # }
 /// ```
-pub fn call(params: SetTransactionParams) -> Result<(), crate::Error> {
+pub fn set_transaction(params: SetTransactionParams) -> Result<(), crate::Error> {
     call_action_void(MoneymoneyActions::SetTransaction(params)).map_err(crate::Error::OsaScript)
 }
 

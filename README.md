@@ -32,12 +32,12 @@ moneymoney = "0.2"
 ## Quick Start
 
 ```rust
-use moneymoney::{export_accounts, export_transactions, ExportTransactionsParams};
+use moneymoney::export_transactions::ExportTransactionsParams;
 use chrono::NaiveDate;
 
 fn main() -> Result<(), moneymoney::Error> {
     // Export all accounts
-    let accounts = export_accounts::call()?;
+    let accounts = moneymoney::export_accounts()?;
     for account in accounts {
         println!("{}: {} {}",
             account.name,
@@ -50,7 +50,7 @@ fn main() -> Result<(), moneymoney::Error> {
     let params = ExportTransactionsParams::new(
         NaiveDate::from_ymd_opt(2024, 1, 1).expect("valid date")
     );
-    let response = export_transactions::call(params)?;
+    let response = moneymoney::export_transactions(params)?;
     println!("Found {} transactions", response.transactions.len());
 
     Ok(())
@@ -75,9 +75,7 @@ All 8 MoneyMoney AppleScript API methods are implemented:
 ### Export Accounts
 
 ```rust
-use moneymoney::export_accounts;
-
-let accounts = export_accounts::call()?;
+let accounts = moneymoney::export_accounts()?;
 for account in accounts.iter().filter(|a| !a.group) {
     println!("Account: {} - Balance: {} {}",
         account.name,
@@ -90,7 +88,7 @@ for account in accounts.iter().filter(|a| !a.group) {
 ### Filter Transactions by Date Range
 
 ```rust
-use moneymoney::{export_transactions, ExportTransactionsParams};
+use moneymoney::export_transactions::ExportTransactionsParams;
 use chrono::NaiveDate;
 
 let params = ExportTransactionsParams::new(
@@ -98,15 +96,13 @@ let params = ExportTransactionsParams::new(
 )
 .to_date(NaiveDate::from_ymd_opt(2024, 12, 31).unwrap());
 
-let response = export_transactions::call(params)?;
+let response = moneymoney::export_transactions(params)?;
 ```
 
 ### Export Categories with Budgets
 
 ```rust
-use moneymoney::export_categories;
-
-let categories = export_categories::call()?;
+let categories = moneymoney::export_categories()?;
 for category in categories {
     if let Some(budget) = category.budget {
         println!("{}: Budget {} {}, Available {}",
@@ -121,24 +117,15 @@ for category in categories {
 
 ## Error Handling
 
-All functions return `Result<T, Error>` for proper error handling:
+All functions return `Result<T, Error>`:
 
 ```rust
-use moneymoney::{export_accounts, Error};
+use moneymoney::Error;
 
-match export_accounts::call() {
-    Ok(accounts) => {
-        println!("Retrieved {} accounts", accounts.len());
-    }
-    Err(Error::OsaScript(e)) => {
-        eprintln!("MoneyMoney communication error: {}", e);
-    }
-    Err(Error::EmptyPlist) => {
-        eprintln!("No data returned");
-    }
-    Err(e) => {
-        eprintln!("Error: {:?}", e);
-    }
+match moneymoney::export_accounts() {
+    Ok(accounts) => println!("Retrieved {} accounts", accounts.len()),
+    Err(Error::OsaScript(e)) => eprintln!("MoneyMoney error: {}", e),
+    Err(e) => eprintln!("Error: {:?}", e),
 }
 ```
 

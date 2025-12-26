@@ -6,10 +6,8 @@
 //! # Example
 //!
 //! ```rust,no_run
-//! use moneymoney::export_accounts;
-//!
 //! # fn main() -> Result<(), moneymoney::Error> {
-//! let accounts = export_accounts::call()?;
+//! let accounts = moneymoney::export_accounts()?;
 //! for account in accounts.iter().filter(|a| !a.group) {
 //!     println!("{}: {} {}",
 //!         account.name,
@@ -213,10 +211,8 @@ pub struct MoneymoneyAccount {
 /// # Example
 ///
 /// ```rust,no_run
-/// use moneymoney::export_accounts;
-///
 /// # fn main() -> Result<(), moneymoney::Error> {
-/// let accounts = export_accounts::call()?;
+/// let accounts = moneymoney::export_accounts()?;
 /// for account in accounts.iter().filter(|a| !a.group) {
 ///     println!("{}: {} {}",
 ///         account.name,
@@ -227,7 +223,7 @@ pub struct MoneymoneyAccount {
 /// # Ok(())
 /// # }
 /// ```
-pub fn call() -> Result<Vec<MoneymoneyAccount>, crate::Error> {
+pub fn export_accounts() -> Result<Vec<MoneymoneyAccount>, crate::Error> {
     call_action_plist(MoneymoneyActions::ExportAccounts)
 }
 
@@ -239,7 +235,7 @@ mod tests {
     #[test]
     #[ignore]
     fn test_list_accounts() {
-        let accounts = super::call().expect("Failed to retrieve accounts");
+        let accounts = super::export_accounts().expect("Failed to retrieve accounts");
         assert!(!accounts.is_empty());
         assert!(
             accounts
