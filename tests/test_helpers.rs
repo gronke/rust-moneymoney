@@ -71,7 +71,7 @@ pub fn ensure_test_accounts_exist() -> Result<(), String> {
 
     println!("✅ Found {} test accounts:", test_accounts.len());
     for account in &test_accounts {
-        println!("   • {} ({}, {})", account.name, account.account_type, account.currency);
+        println!("   • {} ({})", account.name, account.currency);
     }
 
     Ok(())
