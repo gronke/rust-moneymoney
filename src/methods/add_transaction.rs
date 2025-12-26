@@ -27,7 +27,7 @@
 //! # }
 //! ```
 
-use crate::{call_action, MoneymoneyActions};
+use crate::{call_action_void, MoneymoneyActions};
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
@@ -202,8 +202,7 @@ impl AddTransactionParams {
 /// # }
 /// ```
 pub fn call(params: AddTransactionParams) -> Result<(), crate::Error> {
-    call_action(MoneymoneyActions::AddTransaction(params)).map_err(crate::Error::OsaScript)?;
-    Ok(())
+    call_action_void(MoneymoneyActions::AddTransaction(params)).map_err(crate::Error::OsaScript)
 }
 
 #[cfg(test)]

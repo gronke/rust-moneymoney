@@ -175,6 +175,25 @@ pub fn call_action(action: MoneymoneyActions) -> Result<Option<String>, osascrip
     script.execute_with_params(&params)
 }
 
+/// Call a MoneyMoney action that doesn't return data (void operations).
+///
+/// Used for operations like `addTransaction` and `setTransaction` that modify
+/// data but don't return a result.
+pub fn call_action_void(action: MoneymoneyActions) -> Result<(), osascript::Error> {
+    let params = ScriptAction {
+        method: action.method_name(),
+        args: action,
+    };
+    let script = osascript::JavaScript::new(
+        "
+        Application('MoneyMoney')[$params.method]($params.args || {});
+        return true;
+    ",
+    );
+    let _result: bool = script.execute_with_params(&params)?;
+    Ok(())
+}
+
 pub fn call_action_plist<T>(action: MoneymoneyActions) -> Result<T, Error>
 where
     T: DeserializeOwned + Serialize,
