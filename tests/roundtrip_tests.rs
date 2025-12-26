@@ -1,14 +1,23 @@
 //! Roundtrip integration tests for the moneymoney library.
 //!
-//! These tests create test accounts, add transactions, read them back, and modify them
-//! to validate the complete workflow. All test accounts are prefixed with "test-" and
-//! use realistic transaction data from fixtures.
+//! These tests add transactions, read them back, and modify them to validate the complete
+//! workflow. All test accounts are prefixed with "test-" and use realistic transaction data.
 //!
-//! **IMPORTANT**: These tests require MoneyMoney to be running and are marked with `#[ignore]`
-//! by default. Run them with: `cargo test -- --ignored roundtrip`
+//! ## First-Time Setup
 //!
-//! **NOTE**: These tests will create test accounts and transactions in your MoneyMoney database.
-//! You may want to clean them up manually after running the tests.
+//! These tests require two offline test accounts to exist in MoneyMoney.
+//! If they don't exist, the tests will show clear instructions on how to create them.
+//! This is a **one-time setup** - MoneyMoney's API doesn't support account creation.
+//!
+//! ## Running Tests
+//!
+//! ```bash
+//! cargo test --test roundtrip_tests -- --ignored --nocapture
+//! ```
+//!
+//! **NOTE**: Tests intentionally do NOT clean up so you can review results in MoneyMoney.
+
+mod test_helpers;
 
 use chrono::NaiveDate;
 use moneymoney::add_transaction::AddTransactionParams;
@@ -50,7 +59,7 @@ fn load_fixtures() -> TestFixtures {
 /// Test the complete roundtrip: add transactions → read → modify
 ///
 /// This test validates the entire workflow:
-/// 1. Verify test accounts exist
+/// 1. Verify test accounts exist (shows setup instructions if missing)
 /// 2. Add realistic transactions from fixtures
 /// 3. Export and verify the transactions
 /// 4. Modify transactions (add comments, change categories)
@@ -58,27 +67,18 @@ fn load_fixtures() -> TestFixtures {
 #[test]
 #[ignore]
 fn test_roundtrip_add_read_modify_transactions() {
-    let fixtures = load_fixtures();
+    // Step 1: Ensure test accounts exist (one-time setup)
+    if let Err(e) = test_helpers::ensure_test_accounts_exist() {
+        panic!("{}", e);
+    }
 
-    // Step 1: Verify test accounts exist
-    println!("Step 1: Verifying test accounts...");
+    let fixtures = load_fixtures();
     let accounts = export_accounts::call().expect("Failed to export accounts");
 
     let test_accounts: Vec<_> = accounts
         .iter()
         .filter(|a| a.name.starts_with("test-"))
         .collect();
-
-    if test_accounts.is_empty() {
-        panic!(
-            "No test accounts found. Please create offline accounts named: {:?}",
-            fixtures
-                .test_accounts
-                .iter()
-                .map(|a| &a.name)
-                .collect::<Vec<_>>()
-        );
-    }
 
     println!("Found {} test accounts", test_accounts.len());
     for account in &test_accounts {
