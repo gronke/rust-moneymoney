@@ -51,7 +51,7 @@ tell application "MoneyMoney"
     activate
 end tell
 
-delay 0.5
+delay 0.1
 
 tell application "System Events"
     tell process "MoneyMoney"
@@ -60,7 +60,7 @@ tell application "System Events"
     end tell
 end tell
 
-delay 1
+delay 0.5
 
 tell application "System Events"
     tell process "MoneyMoney"
@@ -69,19 +69,19 @@ tell application "System Events"
             click radio button 2
         end tell
 
-        delay 0.5
+        delay 0.15
 
         tell sheet 1 of window 1
             -- Click popup and type to select Offline account
             click pop up button 1
         end tell
 
-        delay 0.5
+        delay 0.1
         keystroke "off"
-        delay 0.3
+        delay 0.05
         keystroke return
 
-        delay 0.5
+        delay 0.15
 
         tell sheet 1 of window 1
             click button "Next"
@@ -89,30 +89,30 @@ tell application "System Events"
     end tell
 end tell
 
-delay 1
+delay 0.25
 
 tell application "System Events"
     tell process "MoneyMoney"
         -- Tab to name field and type account name
         keystroke tab
-        delay 0.3
+        delay 0.05
         keystroke "a" using command down
-        delay 0.2
+        delay 0.05
         keystroke "${account_name}"
 
-        delay 0.5
+        delay 0.1
 
         tell sheet 1 of window 1
             -- Select account type
             click pop up button 1
         end tell
 
-        delay 0.5
+        delay 0.1
         keystroke "${account_type}"
-        delay 0.3
+        delay 0.05
         keystroke return
 
-        delay 0.5
+        delay 0.15
 
         tell sheet 1 of window 1
             click button "Done"
@@ -120,7 +120,7 @@ tell application "System Events"
     end tell
 end tell
 
-delay 1
+delay 0.15
 EOF
 }
 
@@ -133,7 +133,7 @@ else
     exit 1
 fi
 
-sleep 1
+sleep 0.15
 
 # Create test-checking account
 echo "Creating test-checking (Giro account)..."
@@ -147,7 +147,7 @@ fi
 # Verify accounts were created
 echo ""
 echo "Verifying accounts..."
-sleep 1
+sleep 0.15
 
 ACCOUNTS=$(osascript -e 'tell application "MoneyMoney" to export accounts' 2>/dev/null)
 HAS_CASH=$(echo "$ACCOUNTS" | grep -c "test-cash" || true)
