@@ -6,10 +6,8 @@
 //! # Example
 //!
 //! ```rust,no_run
-//! use moneymoney::export_categories;
-//!
 //! # fn main() -> Result<(), moneymoney::Error> {
-//! let categories = export_categories::call()?;
+//! let categories = moneymoney::export_categories()?;
 //! for category in categories {
 //!     if let Some(budget) = category.budget {
 //!         println!("{}: {} {} budget, {} available",
@@ -131,10 +129,8 @@ pub struct MoneymoneyCategory {
 /// # Example
 ///
 /// ```rust,no_run
-/// use moneymoney::export_categories;
-///
 /// # fn main() -> Result<(), moneymoney::Error> {
-/// let categories = export_categories::call()?;
+/// let categories = moneymoney::export_categories()?;
 /// for category in categories.iter().filter(|c| !c.group) {
 ///     if let Some(budget) = &category.budget {
 ///         println!("{}: Budget {} {}, Available {}",
@@ -148,7 +144,7 @@ pub struct MoneymoneyCategory {
 /// # Ok(())
 /// # }
 /// ```
-pub fn call() -> Result<Vec<MoneymoneyCategory>, Error> {
+pub fn export_categories() -> Result<Vec<MoneymoneyCategory>, Error> {
     call_action_plist(MoneymoneyActions::ExportCategories)
 }
 
@@ -160,7 +156,7 @@ mod tests {
     #[test]
     #[ignore]
     fn test_list_categories() {
-        assert!(super::call().is_ok())
+        assert!(super::export_categories().is_ok())
     }
 
     // Unit tests for MoneymoneyCategoryBudget and budget deserialization

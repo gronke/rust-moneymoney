@@ -31,3 +31,17 @@ pub mod create_bank_transfer;
 
 #[cfg(feature = "experimental")]
 pub mod create_direct_debit;
+
+// Re-export functions at crate root for ergonomic API
+pub use add_transaction::add_transaction;
+pub use export_accounts::export_accounts;
+pub use export_categories::export_categories;
+pub use export_portfolio::export_portfolio;
+pub use export_transactions::export_transactions;
+pub use set_transaction::set_transaction;
+
+#[cfg(feature = "experimental")]
+pub use create_bank_transfer::create_bank_transfer;
+
+#[cfg(feature = "experimental")]
+pub use create_direct_debit::create_direct_debit;

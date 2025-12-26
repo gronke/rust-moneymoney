@@ -3,7 +3,7 @@
 use moneymoney::export_accounts;
 
 pub fn ensure_test_accounts_exist() -> Result<(), String> {
-    let accounts = export_accounts::call()
+    let accounts = export_accounts::export_accounts()
         .map_err(|e| format!("Failed to connect to MoneyMoney. Is it running? Error: {}", e))?;
 
     let test_accounts: Vec<_> = accounts

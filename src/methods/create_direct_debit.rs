@@ -30,7 +30,7 @@
 //!     mandate_date: Some("2024-01-15".to_string()),
 //!     ..Default::default()
 //! };
-//! let result = create_direct_debit::call(params)?;
+//! let result = moneymoney::create_direct_debit(params)?;
 //! # Ok(())
 //! # }
 //! # }
@@ -177,11 +177,13 @@ pub struct CreateDirectDebitParams {
 ///     into: Some("outbox".to_string()), // Save to outbox without confirmation
 ///     ..Default::default()
 /// };
-/// let result = create_direct_debit::call(params)?;
+/// let result = moneymoney::create_direct_debit(params)?;
 /// # Ok(())
 /// # }
 /// # }
 /// ```
-pub fn call(params: CreateDirectDebitParams) -> Result<Vec<plist::Value>, crate::Error> {
+pub fn create_direct_debit(
+    params: CreateDirectDebitParams,
+) -> Result<Vec<plist::Value>, crate::Error> {
     call_action_plist(MoneymoneyActions::CreateDirectDebit(params))
 }
