@@ -50,17 +50,19 @@
 //!
 //! ## Available Operations
 //!
-//! ### Accounts
+//! ### Export Operations
 //! - [`export_accounts::call()`] - Export all accounts with balances and metadata
-//!
-//! ### Categories
 //! - [`export_categories::call()`] - Export all categories with budgets
-//!
-//! ### Transactions
 //! - [`export_transactions::call()`] - Export transactions with flexible filtering
+//! - [`export_portfolio::call()`] - Export securities and portfolio holdings
 //!
-//! ### Transfers (Experimental)
-//! - `create_bank_transfer::call()` - Create bank transfers (requires `experimental` feature)
+//! ### Transaction Management
+//! - [`add_transaction::call()`] - Add transactions to offline accounts
+//! - [`set_transaction::call()`] - Modify existing transaction properties (checkmark, category, comment)
+//!
+//! ### Payment Operations (Experimental)
+//! - `create_bank_transfer::call()` - Create SEPA bank transfers (requires `experimental` feature)
+//! - `create_direct_debit::call()` - Create SEPA direct debit orders (requires `experimental` feature)
 //!
 //! ## Feature Flags
 //!
@@ -83,8 +85,13 @@ pub enum MoneymoneyActions {
     ExportAccounts,
     ExportCategories,
     ExportTransactions(methods::export_transactions::ExportTransactionsParams),
+    ExportPortfolio(methods::export_portfolio::ExportPortfolioParams),
+    AddTransaction(methods::add_transaction::AddTransactionParams),
+    SetTransaction(methods::set_transaction::SetTransactionParams),
     #[cfg(feature = "experimental")]
     CreateBankTransfer(methods::create_bank_transfer::CreateBankTransferParams),
+    #[cfg(feature = "experimental")]
+    CreateDirectDebit(methods::create_direct_debit::CreateDirectDebitParams),
 }
 
 impl MoneymoneyActions {
@@ -93,8 +100,13 @@ impl MoneymoneyActions {
             MoneymoneyActions::ExportAccounts => "exportAccounts".to_string(),
             MoneymoneyActions::ExportCategories => "exportCategories".to_string(),
             MoneymoneyActions::ExportTransactions(_) => "exportTransactions".to_string(),
+            MoneymoneyActions::ExportPortfolio(_) => "exportPortfolio".to_string(),
+            MoneymoneyActions::AddTransaction(_) => "addTransaction".to_string(),
+            MoneymoneyActions::SetTransaction(_) => "setTransaction".to_string(),
             #[cfg(feature = "experimental")]
             MoneymoneyActions::CreateBankTransfer(_) => "createBankTransfer".to_string(),
+            #[cfg(feature = "experimental")]
+            MoneymoneyActions::CreateDirectDebit(_) => "createDirectDebit".to_string(),
         }
     }
 }

@@ -122,6 +122,9 @@ pub struct MoneymoneyTransaction {
     pub category_uuid: Uuid,
     /// Whether the transaction has been manually checked/verified.
     pub checkmark: bool,
+    /// Comment/note attached to the transaction.
+    #[serde(default)]
+    pub comment: String,
 }
 
 /// Response from the export transactions operation.
