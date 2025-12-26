@@ -82,7 +82,10 @@ where
             period,
         })),
         Ok(MaybeBudget::Empty {}) => Ok(None),
-        Err(_) => Ok(None),
+        Err(e) => {
+            eprintln!("Warning: failed to parse budget data: {}", e);
+            Ok(None)
+        }
     }
 }
 
