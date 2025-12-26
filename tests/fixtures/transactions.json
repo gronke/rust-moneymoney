@@ -1,0 +1,100 @@
+{
+  "test_accounts": [
+    {
+      "name": "test-cash",
+      "type": "Cash",
+      "currency": "EUR"
+    },
+    {
+      "name": "test-checking",
+      "type": "Giro",
+      "currency": "EUR"
+    }
+  ],
+  "test_transactions": [
+    {
+      "account": "test-cash",
+      "date": "2024-12-20",
+      "to": "Media Markt",
+      "amount": -89.99,
+      "purpose": "USB-C Cable and Mouse"
+    },
+    {
+      "account": "test-cash",
+      "date": "2024-12-21",
+      "to": "Bäckerei Schmidt",
+      "amount": -4.50,
+      "purpose": "Brötchen und Kaffee"
+    },
+    {
+      "account": "test-cash",
+      "date": "2024-12-21",
+      "to": "REWE Supermarkt",
+      "amount": -45.67,
+      "purpose": "Weekly groceries"
+    },
+    {
+      "account": "test-cash",
+      "date": "2024-12-22",
+      "to": "Shell Tankstelle",
+      "amount": -65.00,
+      "purpose": "Fuel"
+    },
+    {
+      "account": "test-checking",
+      "date": "2024-12-22",
+      "to": "Amazon.de",
+      "amount": -29.99,
+      "purpose": "Book: Rust Programming"
+    },
+    {
+      "account": "test-checking",
+      "date": "2024-12-23",
+      "to": "Vodafone GmbH",
+      "amount": -39.99,
+      "purpose": "Mobile phone contract"
+    },
+    {
+      "account": "test-cash",
+      "date": "2024-12-23",
+      "to": "Café Central",
+      "amount": -8.50,
+      "purpose": "Cappuccino and croissant"
+    },
+    {
+      "account": "test-checking",
+      "date": "2024-12-24",
+      "to": "dm-drogerie markt",
+      "amount": -23.45,
+      "purpose": "Toiletries and household items"
+    },
+    {
+      "account": "test-cash",
+      "date": "2024-12-24",
+      "to": "Lidl",
+      "amount": -31.20,
+      "purpose": "Christmas groceries"
+    },
+    {
+      "account": "test-checking",
+      "date": "2024-12-25",
+      "to": "Company Salary",
+      "amount": 3500.00,
+      "purpose": "December salary"
+    },
+    {
+      "account": "test-cash",
+      "date": "2024-12-25",
+      "to": "Restaurant Bella Italia",
+      "amount": -67.50,
+      "purpose": "Christmas dinner"
+    },
+    {
+      "account": "test-checking",
+      "date": "2024-12-26",
+      "to": "Stadtwerke München",
+      "amount": -85.00,
+      "purpose": "Electricity bill"
+    }
+  ]
+}
