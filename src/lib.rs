@@ -144,12 +144,6 @@ pub enum Error {
     /// This error contains the invalid currency code string that was received.
     #[error("Invalid currency code: {0}")]
     InvalidCurrency(String),
-
-    /// A required parameter was missing from the request.
-    ///
-    /// This error contains the name of the missing parameter.
-    #[error("Missing required parameter: {0}")]
-    MissingRequiredParameter(&'static str),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -220,12 +214,6 @@ mod tests {
     fn test_error_display_invalid_currency() {
         let error = Error::InvalidCurrency("XYZ".to_string());
         assert_eq!(error.to_string(), "Invalid currency code: XYZ");
-    }
-
-    #[test]
-    fn test_error_display_missing_parameter() {
-        let error = Error::MissingRequiredParameter("from_date");
-        assert_eq!(error.to_string(), "Missing required parameter: from_date");
     }
 
     #[test]
