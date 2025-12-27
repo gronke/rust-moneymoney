@@ -94,7 +94,12 @@ pub fn ensure_test_accounts_exist() -> Result<Vec<MoneymoneyAccount>, String> {
             REQUIRED_TEST_ACCOUNTS
                 .iter()
                 .enumerate()
-                .map(|(i, (name, desc))| format!("{}. Account name: {}\n   Type: {}\n   Currency: EUR", i + 1, name, desc))
+                .map(|(i, (name, desc))| format!(
+                    "{}. Account name: {}\n   Type: {}\n   Currency: EUR",
+                    i + 1,
+                    name,
+                    desc
+                ))
                 .collect::<Vec<_>>()
                 .join("\n\n"),
             TEST_ACCOUNT_PREFIX
