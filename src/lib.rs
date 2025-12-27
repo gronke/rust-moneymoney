@@ -66,6 +66,7 @@
 //! ## Feature Flags
 //!
 //! - `experimental` - Enables experimental APIs like `create_bank_transfer` that may change
+//! - `test-utils` - Enables test utilities for integration testing (see [`test_utils`] module)
 //!
 //! ## MoneyMoney API Documentation
 //!
@@ -77,6 +78,9 @@ use thiserror::Error;
 
 mod methods;
 pub use methods::*;
+
+#[cfg(feature = "test-utils")]
+pub mod test_utils;
 
 #[derive(Serialize, Deserialize)]
 #[serde(untagged)]
