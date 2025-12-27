@@ -235,6 +235,31 @@ fn test_account_balance_consistency() {
     }
 }
 
+/// Test that the default Uncategorized category exists and has valid structure
+#[test]
+#[ignore]
+fn test_uncategorized_category_exists() {
+    let categories = export_categories::export_categories().expect("Failed to export categories");
+
+    // MoneyMoney always has an "Uncategorized" category
+    let uncategorized = categories
+        .iter()
+        .find(|c| c.name == "Uncategorized")
+        .expect("Uncategorized category should exist");
+
+    // Verify structure
+    assert!(!uncategorized.uuid.is_nil(), "UUID should not be nil");
+    assert!(!uncategorized.group, "Uncategorized should not be a group");
+    assert!(uncategorized.default, "Uncategorized should be the default category");
+    assert_eq!(uncategorized.indentation, 0, "Uncategorized should be at root level");
+
+    println!(
+        "Uncategorized category: uuid={}, currency={}",
+        uncategorized.uuid,
+        uncategorized.currency.code()
+    );
+}
+
 /// Test combined filtering (date + account + category)
 #[test]
 #[ignore]
