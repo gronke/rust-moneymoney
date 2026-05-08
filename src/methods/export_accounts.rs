@@ -9,11 +9,9 @@
 //! # fn main() -> Result<(), moneymoney::Error> {
 //! let accounts = moneymoney::export_accounts()?;
 //! for account in accounts.iter().filter(|a| !a.group) {
-//!     println!("{}: {} {}",
-//!         account.name,
-//!         account.balance.amount,
-//!         account.balance.currency
-//!     );
+//!     if let Some(balance) = &account.balance {
+//!         println!("{}: {} {}", account.name, balance.amount, balance.currency);
+//!     }
 //! }
 //! # Ok(())
 //! # }
@@ -138,6 +136,25 @@ impl TryFrom<Vec<BalanceTuple>> for AccountBalance {
     }
 }
 
+/// Deserialize an optional [`AccountBalance`] from MoneyMoney's balance array.
+///
+/// MoneyMoney returns balance as an array of `[amount, currency]` tuples. Some accounts
+/// (notably account groups with no aggregated balance, or hidden/disabled children) emit
+/// an empty array. We map that to `None` rather than treating it as a deserialization
+/// error.
+fn deserialize_optional_balance<'de, D>(deserializer: D) -> Result<Option<AccountBalance>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let tuples = Vec::<BalanceTuple>::deserialize(deserializer)?;
+    if tuples.is_empty() {
+        return Ok(None);
+    }
+    AccountBalance::try_from(tuples)
+        .map(Some)
+        .map_err(serde::de::Error::custom)
+}
+
 /// A MoneyMoney account with all its metadata.
 ///
 /// This struct represents a complete account record from MoneyMoney, including
@@ -147,7 +164,8 @@ impl TryFrom<Vec<BalanceTuple>> for AccountBalance {
 ///
 /// * `account_number` - The account number
 /// * `attributes` - Custom attributes dictionary
-/// * `balance` - Current balance with currency
+/// * `balance` - Current balance with currency, or `None` if MoneyMoney returned no balance
+///   (e.g., account groups without aggregated balance)
 /// * `bank_code` - Bank identification code (BLZ/BIC)
 /// * `currency` - Account currency code
 /// * `group` - Whether this is an account group
@@ -166,8 +184,10 @@ pub struct MoneymoneyAccount {
     pub account_number: String,
     /// Custom account attributes.
     pub attributes: plist::Dictionary,
-    /// Current account balance with currency.
-    pub balance: AccountBalance,
+    /// Current account balance with currency. `None` when MoneyMoney returns an empty
+    /// balance array (e.g., for some account groups).
+    #[serde(default, deserialize_with = "deserialize_optional_balance")]
+    pub balance: Option<AccountBalance>,
     /// Bank identification code.
     pub bank_code: String,
     /// Account currency code.
@@ -214,11 +234,9 @@ pub struct MoneymoneyAccount {
 /// # fn main() -> Result<(), moneymoney::Error> {
 /// let accounts = moneymoney::export_accounts()?;
 /// for account in accounts.iter().filter(|a| !a.group) {
-///     println!("{}: {} {}",
-///         account.name,
-///         account.balance.amount,
-///         account.balance.currency
-///     );
+///     if let Some(balance) = &account.balance {
+///         println!("{}: {} {}", account.name, balance.amount, balance.currency);
+///     }
 /// }
 /// # Ok(())
 /// # }
@@ -374,5 +392,39 @@ mod tests {
             let balance = AccountBalance::try_from(tuple).unwrap();
             assert_eq!(balance.currency.code(), *code);
         }
+    }
+
+    /// Regression test for https://github.com/gronke/rust-moneymoney/issues/14:
+    /// MoneyMoney returns an empty `<balance>` array for some accounts (e.g., account
+    /// groups with no aggregated balance). Previously this caused
+    /// `Serde("Received empty plist response from MoneyMoney")` for the entire export.
+    #[test]
+    fn test_deserialize_account_with_empty_balance() {
+        let plist_xml = r#"<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+    <dict>
+        <key>accountNumber</key><string></string>
+        <key>attributes</key><dict/>
+        <key>balance</key><array/>
+        <key>bankCode</key><string></string>
+        <key>currency</key><string>EUR</string>
+        <key>group</key><true/>
+        <key>icon</key><data></data>
+        <key>indentation</key><integer>0</integer>
+        <key>name</key><string>All accounts</string>
+        <key>owner</key><string></string>
+        <key>portfolio</key><false/>
+        <key>refreshTimestamp</key><date>2024-01-01T00:00:00Z</date>
+        <key>type</key><string>Account group</string>
+        <key>uuid</key><string>00000000-0000-0000-0000-000000000000</string>
+    </dict>
+</array>
+</plist>"#;
+        let accounts: Vec<MoneymoneyAccount> =
+            plist::from_bytes(plist_xml.as_bytes()).expect("should deserialize");
+        assert_eq!(accounts.len(), 1);
+        assert!(accounts[0].balance.is_none(), "empty balance array should map to None");
     }
 }
