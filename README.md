@@ -38,11 +38,9 @@ fn main() -> Result<(), moneymoney::Error> {
     // Export all accounts
     let accounts = moneymoney::export_accounts()?;
     for account in accounts {
-        println!("{}: {} {}",
-            account.name,
-            account.balance.amount,
-            account.balance.currency
-        );
+        if let Some(balance) = &account.balance {
+            println!("{}: {} {}", account.name, balance.amount, balance.currency);
+        }
     }
 
     // Export transactions from a specific date
@@ -76,11 +74,13 @@ All 8 MoneyMoney AppleScript API methods are implemented:
 ```rust
 let accounts = moneymoney::export_accounts()?;
 for account in accounts.iter().filter(|a| !a.group) {
-    println!("Account: {} - Balance: {} {}",
-        account.name,
-        account.balance.amount,
-        account.balance.currency
-    );
+    if let Some(balance) = &account.balance {
+        println!("Account: {} - Balance: {} {}",
+            account.name,
+            balance.amount,
+            balance.currency
+        );
+    }
 }
 ```
 

@@ -216,22 +216,20 @@ fn test_account_balance_consistency() {
     let accounts = export_accounts::export_accounts().expect("Failed to export accounts");
 
     for account in accounts.iter().filter(|a| !a.group) {
-        // Verify balance currency matches account currency
+        let Some(balance) = &account.balance else {
+            // Non-group accounts may still have an empty balance array (e.g., a freshly
+            // added account that hasn't synced yet). Skip — there's nothing to verify.
+            continue;
+        };
+
         assert_eq!(
-            account.balance.currency.code(),
+            balance.currency.code(),
             account.currency,
             "Balance currency should match account currency for account '{}'",
             account.name
         );
 
-        // Note: Owner can be empty for some account types, which is valid
-
-        println!(
-            "Account '{}': {} {}",
-            account.name,
-            account.balance.amount,
-            account.balance.currency.code()
-        );
+        println!("Account '{}': {} {}", account.name, balance.amount, balance.currency.code());
     }
 }
 
