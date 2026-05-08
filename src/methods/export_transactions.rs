@@ -22,7 +22,7 @@
 //! # }
 //! ```
 
-use core::fmt;
+use std::fmt;
 
 use crate::{call_action_plist, Error, MoneymoneyActions};
 use chrono::{DateTime, NaiveDate, Utc};
