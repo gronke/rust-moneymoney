@@ -22,6 +22,8 @@
 //! # }
 //! ```
 
+use core::fmt;
+
 use crate::{call_action_plist, Error, MoneymoneyActions};
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
@@ -127,6 +129,23 @@ pub struct MoneymoneyTransaction {
     pub comment: String,
 }
 
+impl fmt::Display for MoneymoneyTransaction {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "id ...........: {}", self.id)?;
+        writeln!(f, "booking_date .: {}", self.booking_date)?;
+        writeln!(f, "value_date ...: {}", self.value_date)?;
+        writeln!(f, "name .........: {}", self.name)?;
+        writeln!(f, "purpose ......: {:?}", self.purpose)?;
+        writeln!(f, "amount .......: {}", self.amount)?;
+        writeln!(f, "currency .....: {}", self.currency)?;
+        writeln!(f, "account_uuid .: {}", self.account_uuid)?;
+        writeln!(f, "booked .......: {}", self.booked)?;
+        writeln!(f, "category_uuid : {}", self.category_uuid)?;
+        writeln!(f, "checkmark ....: {}", self.checkmark)?;
+        writeln!(f, "comment ......: {}", self.comment)?;
+        Ok(())
+    }
+}
 /// Response from the export transactions operation.
 ///
 /// Contains metadata about the export and the list of transactions.
