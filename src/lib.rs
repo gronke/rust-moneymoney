@@ -31,11 +31,9 @@
 //! // Export all accounts
 //! let accounts = moneymoney::export_accounts()?;
 //! for account in accounts {
-//!     println!("{}: {} {}",
-//!         account.name,
-//!         account.balance.amount,
-//!         account.balance.currency.code()
-//!     );
+//!     if let Some(balance) = &account.balance {
+//!         println!("{}: {} {}", account.name, balance.amount, balance.currency.code());
+//!     }
 //! }
 //!
 //! // Export transactions from a specific date
