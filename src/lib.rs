@@ -58,13 +58,13 @@
 //! - [`set_transaction()`] - Modify existing transaction properties (checkmark, category, comment)
 //!
 //! ### Payment Operations (Experimental)
-//! - [`create_bank_transfer()`] - Create SEPA bank transfers (requires `experimental` feature)
-//! - [`create_direct_debit()`] - Create SEPA direct debit orders (requires `experimental` feature)
+//! - `create_bank_transfer()` - Create SEPA bank transfers (requires `experimental` feature)
+//! - `create_direct_debit()` - Create SEPA direct debit orders (requires `experimental` feature)
 //!
 //! ## Feature Flags
 //!
 //! - `experimental` - Enables experimental APIs like `create_bank_transfer` that may change
-//! - `test-utils` - Enables test utilities for integration testing (see [`test_utils`] module)
+//! - `test-utils` - Enables test utilities for integration testing (see the `test_utils` module)
 //!
 //! ## MoneyMoney API Documentation
 //!
