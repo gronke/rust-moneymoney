@@ -58,6 +58,8 @@ pub enum MoneymoneyAccountType {
     Other,
     /// Custom account type with a user-defined string.
     Custom(String),
+    /// Portfikui account.
+    Portfolio,
 }
 
 impl Serialize for MoneymoneyAccountType {
@@ -72,9 +74,10 @@ impl Serialize for MoneymoneyAccountType {
             MoneymoneyAccountType::FixedTermDeposit => "Fixed term deposit",
             MoneymoneyAccountType::Loan => "Loan account",
             MoneymoneyAccountType::CreditCard => "Credit card",
-            MoneymoneyAccountType::Cash => "Cash", // Bargeld (matches AccountTypeCash)
+            MoneymoneyAccountType::Cash => "Cash account", // Bargeld (matches AccountTypeCash)
             MoneymoneyAccountType::Other => "Other",
             MoneymoneyAccountType::Custom(value) => value,
+            MoneymoneyAccountType::Portfolio => "Portfolio",
         };
         serializer.serialize_str(s)
     }
@@ -93,7 +96,8 @@ impl<'de> Deserialize<'de> for MoneymoneyAccountType {
             "Fixed term deposit" | "Festgeldanlage" => Ok(MoneymoneyAccountType::FixedTermDeposit),
             "Loan account" | "Darlehenskonto" => Ok(MoneymoneyAccountType::Loan),
             "Credit card" | "Kreditkarte" => Ok(MoneymoneyAccountType::CreditCard),
-            "Cash" | "Bargeld" => Ok(MoneymoneyAccountType::Cash),
+            "Cash account" | "Bargeld" => Ok(MoneymoneyAccountType::Cash),
+            "Portfolio" => Ok(MoneymoneyAccountType::Portfolio),
             "Other" | "Sonstige" => Ok(MoneymoneyAccountType::Other),
             other => Ok(MoneymoneyAccountType::Custom(other.to_string())),
         }
@@ -126,7 +130,15 @@ impl TryFrom<Vec<BalanceTuple>> for AccountBalance {
     type Error = crate::Error;
 
     fn try_from(tuple: Vec<BalanceTuple>) -> Result<Self, Self::Error> {
-        let balance = tuple.first().ok_or(crate::Error::EmptyPlist)?;
+        // MoneyMoney can return an empty balance tuple for some account/group rows.
+        // Treat that as a zero balance in "no currency" (XXX) instead of failing
+        // the whole export.
+        let Some(balance) = tuple.first() else {
+            return Ok(AccountBalance {
+                amount: 0.0,
+                currency: iso_currency::Currency::XXX,
+            });
+        };
 
         let currency = iso_currency::Currency::from_code(&balance.1)
             .ok_or_else(|| crate::Error::InvalidCurrency(balance.1.clone()))?;
@@ -362,9 +374,9 @@ mod tests {
     #[test]
     fn test_account_balance_try_from_empty() {
         let tuple: Vec<BalanceTuple> = vec![];
-        let result = AccountBalance::try_from(tuple);
-        assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), crate::Error::EmptyPlist));
+        let balance = AccountBalance::try_from(tuple).unwrap();
+        assert_eq!(balance.amount, 0.0);
+        assert_eq!(balance.currency.code(), "XXX");
     }
 
     #[test]
