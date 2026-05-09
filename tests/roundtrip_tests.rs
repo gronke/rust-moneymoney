@@ -19,12 +19,24 @@
 
 mod test_helpers;
 
+use std::sync::{Mutex, MutexGuard};
+
 use chrono::NaiveDate;
 use moneymoney::add_transaction::AddTransactionParams;
 use moneymoney::export_transactions::ExportTransactionsParams;
 use moneymoney::set_transaction::SetTransactionParams;
 use moneymoney::{add_transaction, export_accounts, export_transactions, set_transaction};
 use serde::{Deserialize, Serialize};
+
+// MoneyMoney's AppleScript bridge does not tolerate concurrent set_transaction
+// calls; serialize tests in this file to prevent flakes when cargo test runs
+// them in parallel threads.
+#[allow(clippy::incompatible_msrv)] // const Mutex::new is 1.63+; tests are not published.
+static MM_LOCK: Mutex<()> = Mutex::new(());
+
+fn serialize_with_moneymoney() -> MutexGuard<'static, ()> {
+    MM_LOCK.lock().unwrap_or_else(|p| p.into_inner())
+}
 
 #[derive(Debug, Deserialize, Serialize)]
 struct TestAccount {
@@ -67,6 +79,8 @@ fn load_fixtures() -> TestFixtures {
 #[test]
 #[ignore]
 fn test_roundtrip_add_read_modify_transactions() {
+    let _guard = serialize_with_moneymoney();
+
     // Step 1: Ensure test accounts exist (one-time setup)
     if let Err(e) = test_helpers::ensure_test_accounts_exist() {
         panic!("{}", e);
@@ -181,6 +195,8 @@ fn test_roundtrip_add_read_modify_transactions() {
 #[test]
 #[ignore]
 fn test_add_and_read_specific_transaction() {
+    let _guard = serialize_with_moneymoney();
+
     println!("Testing add and immediate read...");
 
     // Add a unique transaction
@@ -212,6 +228,8 @@ fn test_add_and_read_specific_transaction() {
 #[test]
 #[ignore]
 fn test_modify_transaction_category() {
+    let _guard = serialize_with_moneymoney();
+
     println!("Testing transaction category modification...");
 
     // Get a recent transaction from a test account
@@ -267,6 +285,8 @@ fn test_modify_transaction_category() {
 #[test]
 #[ignore]
 fn test_bulk_categorization() {
+    let _guard = serialize_with_moneymoney();
+
     println!("Testing bulk categorization workflow...");
 
     let from_date = NaiveDate::from_ymd_opt(2024, 12, 1).expect("Valid date");
@@ -321,6 +341,8 @@ fn test_bulk_categorization() {
 #[test]
 #[ignore]
 fn test_modification_persistence() {
+    let _guard = serialize_with_moneymoney();
+
     println!("Testing modification persistence...");
 
     let from_date = NaiveDate::from_ymd_opt(2024, 12, 1).expect("Valid date");
