@@ -6,7 +6,7 @@
       "currency": "EUR"
     },
     {
-      "name": "test-checking",
+      "name": "test-giro",
       "type": "Giro",
       "currency": "EUR"
     }
@@ -41,14 +41,14 @@
       "purpose": "Fuel"
     },
     {
-      "account": "test-checking",
+      "account": "test-giro",
       "date": "2024-12-22",
       "to": "Amazon.de",
       "amount": -29.99,
       "purpose": "Book: Rust Programming"
     },
     {
-      "account": "test-checking",
+      "account": "test-giro",
       "date": "2024-12-23",
       "to": "Vodafone GmbH",
       "amount": -39.99,
@@ -62,7 +62,7 @@
       "purpose": "Cappuccino and croissant"
     },
     {
-      "account": "test-checking",
+      "account": "test-giro",
       "date": "2024-12-24",
       "to": "dm-drogerie markt",
       "amount": -23.45,
@@ -76,7 +76,7 @@
       "purpose": "Christmas groceries"
     },
     {
-      "account": "test-checking",
+      "account": "test-giro",
       "date": "2024-12-25",
       "to": "Company Salary",
       "amount": 3500.00,
@@ -90,7 +90,7 @@
       "purpose": "Christmas dinner"
     },
     {
-      "account": "test-checking",
+      "account": "test-giro",
       "date": "2024-12-26",
       "to": "Stadtwerke München",
       "amount": -85.00,

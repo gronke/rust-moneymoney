@@ -25,14 +25,23 @@ use crate::export_accounts::{self, MoneymoneyAccount};
 
 /// Prefix used to identify test accounts in MoneyMoney.
 ///
-/// All test accounts should be named with this prefix (e.g., "test-cash", "test-checking")
+/// All test accounts should be named with this prefix (e.g., "test-cash", "test-giro")
 /// to ensure they're easily identifiable and isolated from real financial data.
 pub const TEST_ACCOUNT_PREFIX: &str = "test-";
 
 /// Required test accounts for full integration testing.
+///
+/// Each entry is `(name, type_label)` where `type_label` matches the string
+/// MoneyMoney emits for that account's `type` field. These cover every account
+/// type creatable via the offline-account UI; `Portfolio` and `Tagesgeld` are
+/// not listed because MoneyMoney does not offer them as offline-creatable types.
 pub const REQUIRED_TEST_ACCOUNTS: &[(&str, &str)] = &[
-    ("test-cash", "Cash Account"),
-    ("test-checking", "Giro/Checking Account"),
+    ("test-cash", "Cash account"),
+    ("test-giro", "Giro account"),
+    ("test-savings", "Savings account"),
+    ("test-fixed-term", "Fixed term deposit"),
+    ("test-loan", "Loan account"),
+    ("test-creditcard", "Credit card"),
 ];
 
 /// Get all accounts that match the test account prefix.
@@ -57,8 +66,7 @@ pub fn get_test_accounts() -> Result<Vec<MoneymoneyAccount>, crate::Error> {
 ///
 /// # Required Accounts
 ///
-/// - `test-cash` - An offline Cash Account in EUR
-/// - `test-checking` - An offline Giro/Checking Account in EUR
+/// See [`REQUIRED_TEST_ACCOUNTS`] for the canonical list and their types.
 ///
 /// # Errors
 ///
@@ -77,18 +85,18 @@ pub fn ensure_test_accounts_exist() -> Result<Vec<MoneymoneyAccount>, String> {
 
     if test_accounts.is_empty() {
         return Err(format!(
-            "\n\n❌ NO TEST ACCOUNTS FOUND\n\n\
+            "\n\nERROR: NO TEST ACCOUNTS FOUND\n\n\
             Integration tests require test accounts to be created manually.\n\
             This is a ONE-TIME setup (MoneyMoney's API doesn't support account creation).\n\n\
             Please create these offline accounts in MoneyMoney:\n\n\
             {}\n\n\
             How to create:\n\
-               • Open MoneyMoney\n\
-               • File → New Account (⌘N)\n\
-               • Select \"Offline Account\"\n\
-               • Choose account type\n\
-               • Enter name and currency (EUR)\n\
-               • Click Create\n\n\
+               - Open MoneyMoney\n\
+               - File -> New Account (Cmd-N)\n\
+               - Select \"Offline Account\"\n\
+               - Choose account type\n\
+               - Enter name and currency (EUR)\n\
+               - Click Create\n\n\
             After creating accounts, run the tests again.\n\
             Tests use only '{}' prefixed accounts and won't touch your real data.\n",
             REQUIRED_TEST_ACCOUNTS
@@ -114,19 +122,19 @@ pub fn ensure_test_accounts_exist() -> Result<Vec<MoneymoneyAccount>, String> {
 
     if !missing.is_empty() {
         return Err(format!(
-            "\n\n⚠️  INCOMPLETE TEST SETUP\n\n\
+            "\n\nWARNING: INCOMPLETE TEST SETUP\n\n\
             Found {} test account(s):\n{}\n\n\
             Missing accounts:\n{}\n\n\
             Please create the missing accounts in MoneyMoney (see above for instructions).\n",
             test_accounts.len(),
             test_accounts
                 .iter()
-                .map(|a| format!("  ✓ {} ({})", a.name, a.currency))
+                .map(|a| format!("  [ok]   {} ({})", a.name, a.currency))
                 .collect::<Vec<_>>()
                 .join("\n"),
             missing
                 .iter()
-                .map(|(name, desc)| format!("  ✗ {} ({})", name, desc))
+                .map(|(name, desc)| format!("  [miss] {} ({})", name, desc))
                 .collect::<Vec<_>>()
                 .join("\n"),
         ));
@@ -160,12 +168,19 @@ mod tests {
 
     #[test]
     fn test_required_accounts_defined() {
-        assert!(REQUIRED_TEST_ACCOUNTS.len() >= 2);
-        assert!(REQUIRED_TEST_ACCOUNTS
+        let names: Vec<&str> = REQUIRED_TEST_ACCOUNTS
             .iter()
-            .any(|(name, _)| *name == "test-cash"));
-        assert!(REQUIRED_TEST_ACCOUNTS
-            .iter()
-            .any(|(name, _)| *name == "test-checking"));
+            .map(|(name, _)| *name)
+            .collect();
+        for expected in [
+            "test-cash",
+            "test-giro",
+            "test-savings",
+            "test-fixed-term",
+            "test-loan",
+            "test-creditcard",
+        ] {
+            assert!(names.contains(&expected), "REQUIRED_TEST_ACCOUNTS missing {expected}");
+        }
     }
 }

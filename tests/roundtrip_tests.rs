@@ -56,7 +56,7 @@ fn load_fixtures() -> TestFixtures {
     serde_json::from_str(fixtures_json).expect("Failed to parse fixtures")
 }
 
-/// Test the complete roundtrip: add transactions → read → modify
+/// Test the complete roundtrip: add transactions -> read -> modify
 ///
 /// This test validates the entire workflow:
 /// 1. Verify test accounts exist (shows setup instructions if missing)
@@ -101,8 +101,10 @@ fn test_roundtrip_add_read_modify_transactions() {
         }
 
         match add_transaction::add_transaction(params) {
-            Ok(_) => println!("  ✓ Added: {} → {} {}", fixture.to, fixture.amount, fixture.account),
-            Err(e) => eprintln!("  ✗ Failed to add transaction: {}", e),
+            Ok(_) => {
+                println!("  [ok]   Added: {} -> {} {}", fixture.to, fixture.amount, fixture.account)
+            }
+            Err(e) => eprintln!("  [FAIL] Failed to add transaction: {}", e),
         }
     }
 
@@ -145,10 +147,10 @@ fn test_roundtrip_add_read_modify_transactions() {
 
         match set_transaction::set_transaction(params) {
             Ok(_) => {
-                println!("  ✓ Modified transaction ID: {}", transaction.id);
+                println!("  [ok]   Modified transaction ID: {}", transaction.id);
                 modified_count += 1;
             }
-            Err(e) => eprintln!("  ✗ Failed to modify transaction: {}", e),
+            Err(e) => eprintln!("  [FAIL] Failed to modify transaction: {}", e),
         }
     }
 
@@ -172,7 +174,7 @@ fn test_roundtrip_add_read_modify_transactions() {
     println!("Verified {} transactions with comments", verified_count);
     assert!(verified_count > 0, "Expected at least one modified transaction");
 
-    println!("\n✅ Roundtrip test completed successfully!");
+    println!("\nOK: Roundtrip test completed successfully.");
 }
 
 /// Test adding transactions and reading them back immediately
@@ -189,7 +191,7 @@ fn test_add_and_read_specific_transaction() {
         .purpose("Roundtrip test transaction");
 
     add_transaction::add_transaction(params).expect("Failed to add transaction");
-    println!("✓ Added unique test transaction");
+    println!("[ok] Added unique test transaction");
 
     // Read it back
     let export_params = ExportTransactionsParams::new(date);
@@ -202,8 +204,8 @@ fn test_add_and_read_specific_transaction() {
         .any(|t| t.name.contains(unique_merchant) && t.amount == -99.99);
 
     assert!(found, "Should find the transaction we just added");
-    println!("✓ Found the transaction in export");
-    println!("✅ Add and read test passed!");
+    println!("[ok] Found the transaction in export");
+    println!("OK: Add and read test passed.");
 }
 
 /// Test modifying a transaction's category
@@ -238,7 +240,7 @@ fn test_modify_transaction_category() {
             SetTransactionParams::new(transaction.id).comment("Modified by roundtrip test");
 
         set_transaction::set_transaction(params).expect("Failed to modify");
-        println!("✓ Modified transaction");
+        println!("[ok] Modified transaction");
 
         // Verify the change
         let response =
@@ -252,10 +254,10 @@ fn test_modify_transaction_category() {
         {
             // Note: Comment may be empty or contain our text depending on race conditions
             // We just verify the modification call succeeded
-            println!("✓ Verified transaction modified, comment: '{}'", modified.comment);
+            println!("[ok] Verified transaction modified, comment: '{}'", modified.comment);
         }
 
-        println!("✅ Modification test passed!");
+        println!("OK: Modification test passed.");
     } else {
         panic!("No test account transactions found");
     }
@@ -307,12 +309,12 @@ fn test_bulk_categorization() {
             .comment(format!("Auto-labeled as: {}", label));
 
         match set_transaction::set_transaction(params) {
-            Ok(_) => println!("  ✓ Labeled {} as {}", transaction.name, label),
-            Err(e) => eprintln!("  ✗ Failed: {}", e),
+            Ok(_) => println!("  [ok]   Labeled {} as {}", transaction.name, label),
+            Err(e) => eprintln!("  [FAIL] Failed: {}", e),
         }
     }
 
-    println!("✅ Bulk categorization test completed!");
+    println!("OK: Bulk categorization test completed.");
 }
 
 /// Test that modifications persist across multiple reads
@@ -344,7 +346,7 @@ fn test_modification_persistence() {
         // Modify it
         let params = SetTransactionParams::new(transaction.id).comment(&unique_comment);
         set_transaction::set_transaction(params).expect("Failed to modify");
-        println!("✓ Added unique comment");
+        println!("[ok] Added unique comment");
 
         // Read it back and verify comment was set
         // Note: Other parallel tests may modify this same transaction, so we just
@@ -359,7 +361,7 @@ fn test_modification_persistence() {
             .find(|t| t.id == transaction.id)
         {
             // Just verify the transaction exists and has been modified
-            println!("✓ Transaction found with comment: '{}'", found.comment);
+            println!("[ok] Transaction found with comment: '{}'", found.comment);
             // In single-test mode, the unique comment would persist
             // In parallel mode, another test might overwrite it
             assert!(
@@ -370,7 +372,7 @@ fn test_modification_persistence() {
             panic!("Transaction not found");
         }
 
-        println!("✅ Persistence test passed!");
+        println!("OK: Persistence test passed.");
     } else {
         panic!("No test transactions found");
     }
