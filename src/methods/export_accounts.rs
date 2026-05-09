@@ -285,7 +285,7 @@ mod tests {
             MoneymoneyAccountType::CreditCard
         ));
         assert!(matches!(
-            serde_json::from_str::<MoneymoneyAccountType>(r#""Cash""#).unwrap(),
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Cash account""#).unwrap(),
             MoneymoneyAccountType::Cash
         ));
         assert!(matches!(
@@ -340,7 +340,7 @@ mod tests {
 
     #[test]
     fn test_account_type_serialize() {
-        assert_eq!(serde_json::to_string(&MoneymoneyAccountType::Cash).unwrap(), r#""Cash""#);
+        assert_eq!(serde_json::to_string(&MoneymoneyAccountType::Cash).unwrap(), r#""Cash account""#);
         assert_eq!(
             serde_json::to_string(&MoneymoneyAccountType::Giro).unwrap(),
             r#""Giro account""#
