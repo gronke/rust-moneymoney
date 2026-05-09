@@ -31,11 +31,11 @@ use uuid::Uuid;
 ///
 /// # Serialization
 ///
-/// When serializing, English strings are used (e.g., "Cash", "Giro account").
+/// When serializing, English strings are used (e.g., "Cash account", "Giro account").
 ///
 /// # Deserialization
 ///
-/// Both English and German strings are supported (e.g., "Cash"/"Bargeld",
+/// Both English and German strings are supported (e.g., "Cash account"/"Bargeld",
 /// "Giro account"/"Girokonto"). Unknown account type strings are captured
 /// as [`MoneymoneyAccountType::Custom`].
 #[derive(Debug)]
@@ -54,6 +54,8 @@ pub enum MoneymoneyAccountType {
     CreditCard,
     /// Cash account.
     Cash,
+    /// Portfolio account.
+    Portfolio,
     /// Other account type.
     Other,
     /// Custom account type with a user-defined string.
@@ -72,7 +74,8 @@ impl Serialize for MoneymoneyAccountType {
             MoneymoneyAccountType::FixedTermDeposit => "Fixed term deposit",
             MoneymoneyAccountType::Loan => "Loan account",
             MoneymoneyAccountType::CreditCard => "Credit card",
-            MoneymoneyAccountType::Cash => "Cash", // Bargeld (matches AccountTypeCash)
+            MoneymoneyAccountType::Cash => "Cash account", // Bargeld (matches AccountTypeCash)
+            MoneymoneyAccountType::Portfolio => "Portfolio",
             MoneymoneyAccountType::Other => "Other",
             MoneymoneyAccountType::Custom(value) => value,
         };
@@ -93,7 +96,8 @@ impl<'de> Deserialize<'de> for MoneymoneyAccountType {
             "Fixed term deposit" | "Festgeldanlage" => Ok(MoneymoneyAccountType::FixedTermDeposit),
             "Loan account" | "Darlehenskonto" => Ok(MoneymoneyAccountType::Loan),
             "Credit card" | "Kreditkarte" => Ok(MoneymoneyAccountType::CreditCard),
-            "Cash" | "Bargeld" => Ok(MoneymoneyAccountType::Cash),
+            "Cash account" | "Bargeld" => Ok(MoneymoneyAccountType::Cash),
+            "Portfolio" => Ok(MoneymoneyAccountType::Portfolio),
             "Other" | "Sonstige" => Ok(MoneymoneyAccountType::Other),
             other => Ok(MoneymoneyAccountType::Custom(other.to_string())),
         }
@@ -273,8 +277,12 @@ mod tests {
             MoneymoneyAccountType::CreditCard
         ));
         assert!(matches!(
-            serde_json::from_str::<MoneymoneyAccountType>(r#""Cash""#).unwrap(),
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Cash account""#).unwrap(),
             MoneymoneyAccountType::Cash
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Portfolio""#).unwrap(),
+            MoneymoneyAccountType::Portfolio
         ));
         assert!(matches!(
             serde_json::from_str::<MoneymoneyAccountType>(r#""Other""#).unwrap(),
@@ -328,7 +336,14 @@ mod tests {
 
     #[test]
     fn test_account_type_serialize() {
-        assert_eq!(serde_json::to_string(&MoneymoneyAccountType::Cash).unwrap(), r#""Cash""#);
+        assert_eq!(
+            serde_json::to_string(&MoneymoneyAccountType::Cash).unwrap(),
+            r#""Cash account""#
+        );
+        assert_eq!(
+            serde_json::to_string(&MoneymoneyAccountType::Portfolio).unwrap(),
+            r#""Portfolio""#
+        );
         assert_eq!(
             serde_json::to_string(&MoneymoneyAccountType::Giro).unwrap(),
             r#""Giro account""#
