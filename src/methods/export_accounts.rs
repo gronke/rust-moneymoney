@@ -37,6 +37,7 @@ use uuid::Uuid;
 /// "Giro account"/"Girokonto"). Unknown account type strings are captured
 /// as [`MoneymoneyAccountType::Custom`].
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum MoneymoneyAccountType {
     /// Account group (container for organizing other accounts).
     Group,
