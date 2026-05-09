@@ -56,6 +56,11 @@ pub enum MoneymoneyAccountType {
     Cash,
     /// Portfolio account.
     Portfolio,
+    /// Call money / overnight savings account (Tagesgeld).
+    ///
+    /// MoneyMoney has no separate English label for this type; both serialization
+    /// and deserialization use the German term `Tagesgeld`.
+    Tagesgeld,
     /// Other account type.
     Other,
     /// Custom account type with a user-defined string.
@@ -74,8 +79,9 @@ impl Serialize for MoneymoneyAccountType {
             MoneymoneyAccountType::FixedTermDeposit => "Fixed term deposit",
             MoneymoneyAccountType::Loan => "Loan account",
             MoneymoneyAccountType::CreditCard => "Credit card",
-            MoneymoneyAccountType::Cash => "Cash account", // Bargeld (matches AccountTypeCash)
+            MoneymoneyAccountType::Cash => "Cash account", // Bargeld
             MoneymoneyAccountType::Portfolio => "Portfolio",
+            MoneymoneyAccountType::Tagesgeld => "Tagesgeld",
             MoneymoneyAccountType::Other => "Other",
             MoneymoneyAccountType::Custom(value) => value,
         };
@@ -100,6 +106,7 @@ impl<'de> Deserialize<'de> for MoneymoneyAccountType {
             "Credit card" | "Kreditkarte" => Ok(MoneymoneyAccountType::CreditCard),
             "Cash account" | "Bargeld" => Ok(MoneymoneyAccountType::Cash),
             "Portfolio" => Ok(MoneymoneyAccountType::Portfolio),
+            "Tagesgeld" | "Tagesgeldkonto" => Ok(MoneymoneyAccountType::Tagesgeld),
             "Other" | "Sonstige" => Ok(MoneymoneyAccountType::Other),
             other => Ok(MoneymoneyAccountType::Custom(other.to_string())),
         }
@@ -287,6 +294,14 @@ mod tests {
             MoneymoneyAccountType::Portfolio
         ));
         assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Tagesgeld""#).unwrap(),
+            MoneymoneyAccountType::Tagesgeld
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Tagesgeldkonto""#).unwrap(),
+            MoneymoneyAccountType::Tagesgeld
+        ));
+        assert!(matches!(
             serde_json::from_str::<MoneymoneyAccountType>(r#""Other""#).unwrap(),
             MoneymoneyAccountType::Other
         ));
@@ -349,6 +364,10 @@ mod tests {
         assert_eq!(
             serde_json::to_string(&MoneymoneyAccountType::Portfolio).unwrap(),
             r#""Portfolio""#
+        );
+        assert_eq!(
+            serde_json::to_string(&MoneymoneyAccountType::Tagesgeld).unwrap(),
+            r#""Tagesgeld""#
         );
         assert_eq!(
             serde_json::to_string(&MoneymoneyAccountType::Giro).unwrap(),
