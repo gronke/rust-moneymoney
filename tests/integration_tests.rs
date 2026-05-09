@@ -4,6 +4,7 @@
 //! by default. Run them with: `cargo test -- --ignored`
 
 use chrono::NaiveDate;
+use moneymoney::export_accounts::MoneymoneyAccountType;
 use moneymoney::export_transactions::ExportTransactionsParams;
 use moneymoney::{export_accounts, export_categories, export_transactions};
 
@@ -289,5 +290,53 @@ fn test_combined_filtering() {
         }
 
         println!("Found {} transactions matching all filters", response.transactions.len());
+    }
+}
+
+/// Verify that every seeded test account deserializes as the expected typed
+/// variant, and that no `test-` account falls through to `Custom`.
+///
+/// Run `scripts/create_test_accounts.sh` first to seed the accounts.
+#[test]
+#[ignore]
+fn test_seeded_accounts_recognize_all_types() {
+    let accounts = export_accounts::export_accounts().expect("export_accounts failed");
+
+    let expected: &[(&str, MoneymoneyAccountType)] = &[
+        ("test-cash", MoneymoneyAccountType::Cash),
+        ("test-giro", MoneymoneyAccountType::Giro),
+        ("test-savings", MoneymoneyAccountType::Savings),
+        ("test-fixed-term", MoneymoneyAccountType::FixedTermDeposit),
+        ("test-loan", MoneymoneyAccountType::Loan),
+        ("test-creditcard", MoneymoneyAccountType::CreditCard),
+    ];
+
+    for (name, expected_type) in expected {
+        let acc = accounts
+            .iter()
+            .find(|a| &a.name == name)
+            .unwrap_or_else(|| {
+                panic!("missing seeded account: {name} (run scripts/create_test_accounts.sh)")
+            });
+        assert_eq!(
+            std::mem::discriminant(&acc.r#type),
+            std::mem::discriminant(expected_type),
+            "account '{name}' deserialized as {:?}, expected {:?}",
+            acc.r#type,
+            expected_type,
+        );
+    }
+
+    for acc in accounts
+        .iter()
+        .filter(|a| a.name.starts_with("test-") && !a.group)
+    {
+        if let MoneymoneyAccountType::Custom(s) = &acc.r#type {
+            panic!(
+                "test account '{}' fell through to Custom({s:?}) — \
+                 the deserializer does not recognize this type label",
+                acc.name
+            );
+        }
     }
 }

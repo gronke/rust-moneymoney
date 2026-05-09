@@ -36,7 +36,7 @@ fi
 
 echo "Found test accounts:"
 echo "$TEST_ACCOUNTS" | while read -r account; do
-    echo "  • $account"
+    echo "  - $account"
 done
 echo ""
 
@@ -104,9 +104,9 @@ echo "$TEST_ACCOUNTS" | while read -r account; do
     if [ -n "$account" ]; then
         echo -n "Deleting $account... "
         if delete_account "$account" 2>/dev/null; then
-            echo -e "${GREEN}✓${NC}"
+            echo -e "${GREEN}[ok]${NC}"
         else
-            echo -e "${RED}✗${NC}"
+            echo -e "${RED}[FAIL]${NC}"
         fi
         sleep 0.15
     fi
@@ -121,19 +121,19 @@ REMAINING=$(osascript -e 'tell application "MoneyMoney" to export accounts' 2>/d
 REMAINING=${REMAINING:-0}
 
 if [ "$REMAINING" -eq 0 ]; then
-    echo -e "${GREEN}✅ All test accounts removed successfully!${NC}"
+    echo -e "${GREEN}OK: All test accounts removed.${NC}"
     echo ""
     echo "Your MoneyMoney is now clean of test data."
 else
-    echo -e "${YELLOW}⚠️  Some test accounts may still exist${NC}"
+    echo -e "${YELLOW}WARNING: Some test accounts may still exist.${NC}"
     echo ""
     echo "Remaining test accounts:"
     osascript -e 'tell application "MoneyMoney" to export accounts' | grep -o '<string>test-[^<]*</string>' | sed 's/<[^>]*>//g' | while read -r account; do
-        echo "  • $account"
+        echo "  - $account"
     done
     echo ""
     echo "You may need to delete them manually:"
     echo "  1. Select the account in MoneyMoney sidebar"
-    echo "  2. Account → Remove Account..."
+    echo "  2. Account -> Remove Account..."
     echo "  3. Click 'Delete Permanently'"
 fi

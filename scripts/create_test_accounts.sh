@@ -1,178 +1,188 @@
 #!/bin/bash
-# Script to automatically create test accounts in MoneyMoney using UI automation
-# This is a one-time setup for integration tests
+# Script to automatically create test accounts in MoneyMoney using UI automation.
+# This is a one-time setup for integration tests.
+#
+# Each entry below is "name|type". The type must match a label MoneyMoney
+# offers in the Add-Account dialog's account-type popup. Portfolio and
+# Tagesgeld are deliberately omitted — those types are not creatable via
+# the offline-account UI; they only appear on bank-synced accounts.
 
 set -e
 
-# Colors for output
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
-NC='\033[0m' # No Color
+NC='\033[0m'
+
+ACCOUNTS=(
+    "test-cash|Cash account"
+    "test-giro|Giro account"
+    "test-savings|Savings account"
+    "test-fixed-term|Fixed term deposit"
+    "test-loan|Loan account"
+    "test-creditcard|Credit card"
+)
 
 echo -e "${BLUE}MoneyMoney Test Account Setup${NC}"
 echo "=============================="
 echo ""
 
-# Check if MoneyMoney is running
 if ! pgrep -x "MoneyMoney" > /dev/null; then
     echo -e "${YELLOW}Starting MoneyMoney...${NC}"
     open -a "MoneyMoney"
     sleep 3
 fi
 
-# Check if test accounts already exist
-EXISTING=$(osascript -e 'tell application "MoneyMoney" to export accounts' 2>/dev/null | grep -c "test-cash\|test-checking" || true)
-if [ "$EXISTING" -ge 2 ]; then
-    echo -e "${GREEN}Test accounts already exist!${NC}"
-    echo ""
-    osascript -e 'tell application "MoneyMoney" to export accounts' | grep -B1 "test-" | grep "<string>" | sed 's/.*<string>\(.*\)<\/string>/  • \1/'
-    echo ""
-    echo "You can run integration tests:"
-    echo "  cargo test --test roundtrip_tests -- --ignored --nocapture"
-    exit 0
-fi
+EXISTING=$(osascript -e 'tell application "MoneyMoney" to export accounts' 2>/dev/null)
 
-echo -e "${YELLOW}Creating test accounts using UI automation...${NC}"
-echo ""
-echo "Note: This requires Accessibility permissions for Terminal/VSCode."
-echo "If you see a permission error, grant access in System Settings:"
-echo "  → Privacy & Security → Accessibility → Enable your terminal app"
-echo ""
+# Idempotency: skip accounts that already exist with the right type.
+# Reads plist data on stdin; exit codes:
+#   0 = account exists with the expected type
+#   1 = account does not exist
+#   2 = account exists but with a different type
+account_exists_with_type() {
+    local name="$1"
+    local expected_type="$2"
+    python3 -c '
+import plistlib, sys
+name, expected = sys.argv[1], sys.argv[2]
+data = sys.stdin.buffer.read()
+accs = plistlib.loads(data) if data else []
+for a in accs:
+    if a.get("name") == name:
+        sys.exit(0 if a.get("type") == expected else 2)
+sys.exit(1)
+' "$name" "$expected_type"
+}
 
-# Function to create a single account
 create_account() {
-    local account_name="$1"
-    local account_type="$2"  # "cash" or "giro"
+    local name="$1"
+    local type_label="$2"
 
     osascript <<EOF
-tell application "MoneyMoney"
-    activate
-end tell
-
-delay 0.1
-
+tell application "MoneyMoney" to activate
+delay 0.3
 tell application "System Events"
     tell process "MoneyMoney"
-        -- Open Account → Add Account...
         click menu item "Add Account..." of menu "Account" of menu bar 1
     end tell
 end tell
-
-delay 0.5
-
+delay 0.6
 tell application "System Events"
     tell process "MoneyMoney"
         tell sheet 1 of window 1
-            -- Click "Other" radio button
+            -- "Other" radio button (offline accounts and bank-specific cards)
             click radio button 2
         end tell
-
-        delay 0.15
-
+        delay 0.2
         tell sheet 1 of window 1
-            -- Click popup and type to select Offline account
             click pop up button 1
         end tell
-
-        delay 0.1
+        delay 0.3
         keystroke "off"
-        delay 0.05
+        delay 0.2
         keystroke return
-
-        delay 0.15
-
+        delay 0.3
         tell sheet 1 of window 1
             click button "Next"
         end tell
     end tell
 end tell
-
-delay 0.25
-
+delay 0.6
 tell application "System Events"
     tell process "MoneyMoney"
-        -- Tab to name field and type account name
-        keystroke tab
-        delay 0.05
-        keystroke "a" using command down
-        delay 0.05
-        keystroke "${account_name}"
-
-        delay 0.1
-
         tell sheet 1 of window 1
-            -- Select account type
+            -- text field 7 is "Icon & Name"; pop up button 1 is the type selector.
+            set value of text field 7 to "${name}"
+            delay 0.3
             click pop up button 1
-        end tell
-
-        delay 0.1
-        keystroke "${account_type}"
-        delay 0.05
-        keystroke return
-
-        delay 0.15
-
-        tell sheet 1 of window 1
+            delay 0.5
+            click menu item "${type_label}" of menu 1 of pop up button 1
+            delay 0.4
             click button "Done"
         end tell
     end tell
 end tell
-
-delay 0.15
+delay 0.7
 EOF
 }
 
-# Create test-cash account
-echo "Creating test-cash (Cash account)..."
-if create_account "test-cash" "cash"; then
-    echo -e "  ${GREEN}✓${NC} test-cash created"
-else
-    echo -e "  ${RED}✗${NC} Failed to create test-cash"
-    exit 1
-fi
+CREATED=0
+SKIPPED=0
+FAILED=0
 
-sleep 0.15
+for entry in "${ACCOUNTS[@]}"; do
+    name="${entry%%|*}"
+    type_label="${entry##*|}"
 
-# Create test-checking account
-echo "Creating test-checking (Giro account)..."
-if create_account "test-checking" "giro"; then
-    echo -e "  ${GREEN}✓${NC} test-checking created"
-else
-    echo -e "  ${RED}✗${NC} Failed to create test-checking"
-    exit 1
-fi
+    # Re-export each iteration so previously-created accounts are visible.
+    EXISTING=$(osascript -e 'tell application "MoneyMoney" to export accounts' 2>/dev/null)
 
-# Verify accounts were created
+    set +e
+    echo "$EXISTING" | account_exists_with_type "$name" "$type_label"
+    status=$?
+    set -e
+
+    case $status in
+        0)
+            echo -e "  ${GREEN}[skip]${NC} $name already exists ($type_label)"
+            SKIPPED=$((SKIPPED + 1))
+            continue
+            ;;
+        2)
+            echo -e "  ${YELLOW}[WARN]${NC} $name exists with wrong type. Delete it first via scripts/delete_test_accounts.sh"
+            FAILED=$((FAILED + 1))
+            continue
+            ;;
+    esac
+
+    echo -n "Creating $name ($type_label)... "
+    if create_account "$name" "$type_label" 2>/dev/null; then
+        echo -e "${GREEN}[ok]${NC}"
+        CREATED=$((CREATED + 1))
+    else
+        echo -e "${RED}[FAIL]${NC}"
+        FAILED=$((FAILED + 1))
+    fi
+    sleep 0.2
+done
+
 echo ""
 echo "Verifying accounts..."
-sleep 0.15
+sleep 0.3
+FINAL=$(osascript -e 'tell application "MoneyMoney" to export accounts' 2>/dev/null)
+ALL_GOOD=1
+for entry in "${ACCOUNTS[@]}"; do
+    name="${entry%%|*}"
+    type_label="${entry##*|}"
+    set +e
+    echo "$FINAL" | account_exists_with_type "$name" "$type_label"
+    status=$?
+    set -e
+    if [ $status -eq 0 ]; then
+        echo -e "  ${GREEN}[ok]${NC} $name ($type_label)"
+    else
+        echo -e "  ${RED}[FAIL]${NC} $name ($type_label) -- verification failed (status $status)"
+        ALL_GOOD=0
+    fi
+done
 
-ACCOUNTS=$(osascript -e 'tell application "MoneyMoney" to export accounts' 2>/dev/null)
-HAS_CASH=$(echo "$ACCOUNTS" | grep -c "test-cash" || true)
-HAS_CHECKING=$(echo "$ACCOUNTS" | grep -c "test-checking" || true)
+echo ""
+echo "Summary: ${CREATED} created, ${SKIPPED} skipped, ${FAILED} failed"
 
-if [ "$HAS_CASH" -ge 1 ] && [ "$HAS_CHECKING" -ge 1 ]; then
-    echo -e "${GREEN}✅ Test accounts created successfully!${NC}"
+if [ $ALL_GOOD -eq 1 ]; then
+    echo -e "${GREEN}OK: All test accounts ready.${NC}"
     echo ""
-    echo "Created accounts:"
-    echo "  • test-cash (Cash Account, EUR)"
-    echo "  • test-checking (Giro Account, EUR)"
-    echo ""
-    echo "You can now run integration tests:"
-    echo "  cargo test --test roundtrip_tests -- --ignored --nocapture"
+    echo "Run the integration tests:"
+    echo "  cargo test --features test-utils --test integration_tests -- --ignored --nocapture"
 else
-    echo -e "${RED}❌ Account verification failed${NC}"
+    echo -e "${RED}ERROR: Some accounts failed verification.${NC}"
     echo ""
-    echo "The UI automation may need adjustment for your MoneyMoney version."
-    echo "Please create the accounts manually:"
-    echo "  1. Open MoneyMoney"
-    echo "  2. Account → Add Account..."
-    echo "  3. Select 'Other' → 'Offline account / Cash'"
-    echo "  4. Click Next"
-    echo "  5. Name: test-cash, Type: Cash account"
-    echo "  6. Click Done"
-    echo "  7. Repeat for test-checking (Type: Giro account)"
+    echo "If UI automation broke, you can create accounts manually:"
+    echo "  1. MoneyMoney -> Account -> Add Account..."
+    echo "  2. Other -> Offline account / Cash -> Next"
+    echo "  3. Set name and type from the dropdown"
+    echo "  4. Click Done"
     exit 1
 fi
