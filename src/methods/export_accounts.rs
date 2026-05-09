@@ -58,7 +58,7 @@ pub enum MoneymoneyAccountType {
     Other,
     /// Custom account type with a user-defined string.
     Custom(String),
-    /// Portfikui account.
+    /// Portfolio account.
     Portfolio,
 }
 
