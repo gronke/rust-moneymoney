@@ -54,12 +54,12 @@ pub enum MoneymoneyAccountType {
     CreditCard,
     /// Cash account.
     Cash,
+    /// Portfolio account.
+    Portfolio,
     /// Other account type.
     Other,
     /// Custom account type with a user-defined string.
     Custom(String),
-    /// Portfolio account.
-    Portfolio,
 }
 
 impl Serialize for MoneymoneyAccountType {
@@ -75,9 +75,9 @@ impl Serialize for MoneymoneyAccountType {
             MoneymoneyAccountType::Loan => "Loan account",
             MoneymoneyAccountType::CreditCard => "Credit card",
             MoneymoneyAccountType::Cash => "Cash account", // Bargeld (matches AccountTypeCash)
+            MoneymoneyAccountType::Portfolio => "Portfolio",
             MoneymoneyAccountType::Other => "Other",
             MoneymoneyAccountType::Custom(value) => value,
-            MoneymoneyAccountType::Portfolio => "Portfolio",
         };
         serializer.serialize_str(s)
     }
