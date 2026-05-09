@@ -189,6 +189,11 @@ MIT License - See [LICENSE](LICENSE) file for details
 
 Stefan Grönke - [stefan@gronke.net](mailto:stefan@gronke.net)
 
+## Automated Coding Assistance
+
+This project is developed with automated coding assistance, particularly for test automation and quality assurance.
+Needless to say, Cargo releases and tags are reviewed and signed on dedicated systems.
+
 ## Resources
 
 - [MoneyMoney Application](https://moneymoney-app.com/)
