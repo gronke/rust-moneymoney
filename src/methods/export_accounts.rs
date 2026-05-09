@@ -93,7 +93,9 @@ impl<'de> Deserialize<'de> for MoneymoneyAccountType {
             "Account group" | "Kontengruppe" => Ok(MoneymoneyAccountType::Group),
             "Giro account" | "Girokonto" => Ok(MoneymoneyAccountType::Giro),
             "Savings account" | "Sparkonto" => Ok(MoneymoneyAccountType::Savings),
-            "Fixed term deposit" | "Festgeldanlage" => Ok(MoneymoneyAccountType::FixedTermDeposit),
+            "Fixed term deposit" | "Festgeldkonto" | "Festgeldanlage" => {
+                Ok(MoneymoneyAccountType::FixedTermDeposit)
+            }
             "Loan account" | "Darlehenskonto" => Ok(MoneymoneyAccountType::Loan),
             "Credit card" | "Kreditkarte" => Ok(MoneymoneyAccountType::CreditCard),
             "Cash account" | "Bargeld" => Ok(MoneymoneyAccountType::Cash),
@@ -303,6 +305,10 @@ mod tests {
         assert!(matches!(
             serde_json::from_str::<MoneymoneyAccountType>(r#""Sparkonto""#).unwrap(),
             MoneymoneyAccountType::Savings
+        ));
+        assert!(matches!(
+            serde_json::from_str::<MoneymoneyAccountType>(r#""Festgeldkonto""#).unwrap(),
+            MoneymoneyAccountType::FixedTermDeposit
         ));
         assert!(matches!(
             serde_json::from_str::<MoneymoneyAccountType>(r#""Festgeldanlage""#).unwrap(),
