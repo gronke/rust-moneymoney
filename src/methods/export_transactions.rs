@@ -150,7 +150,7 @@ pub struct MoneymoneyTransaction {
     /// Whether the transaction has been manually checked/verified.
     pub checkmark: bool,
     /// Comment/note attached to the transaction.
-     #[serde(default)]
+    #[serde(default)]
     pub comment: String,
 }
 
