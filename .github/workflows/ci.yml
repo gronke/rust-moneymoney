@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    branches: [main]
 
 env:
   CARGO_TERM_COLOR: always
@@ -14,9 +15,29 @@ jobs:
     name: Check
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        uses: ./.github/actions/install-rust-toolchain
+
+      - name: Cache cargo registry & git
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-deps-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: cargo-deps-${{ runner.os }}-
+
+      - name: Cache target/
+        uses: actions/cache@v5
+        with:
+          path: target
+          key: cargo-target-${{ runner.os }}-check-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            cargo-target-${{ runner.os }}-check-
+            cargo-target-${{ runner.os }}-
+
       - name: Check compilation
         run: cargo check --all-features
 
@@ -24,11 +45,32 @@ jobs:
     name: Test
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        uses: ./.github/actions/install-rust-toolchain
+
+      - name: Cache cargo registry & git
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-deps-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: cargo-deps-${{ runner.os }}-
+
+      - name: Cache target/
+        uses: actions/cache@v5
+        with:
+          path: target
+          key: cargo-target-${{ runner.os }}-test-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            cargo-target-${{ runner.os }}-test-
+            cargo-target-${{ runner.os }}-
+
       - name: Run unit tests
         run: cargo test --lib
+
       - name: Run doc tests
         run: cargo test --doc
 
@@ -36,10 +78,13 @@ jobs:
     name: Format
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        uses: ./.github/actions/install-rust-toolchain
         with:
           components: rustfmt
+
       - name: Check formatting
         run: cargo fmt --all -- --check
 
@@ -47,11 +92,31 @@ jobs:
     name: Clippy
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        uses: ./.github/actions/install-rust-toolchain
         with:
           components: clippy
-      - uses: Swatinem/rust-cache@v2
+
+      - name: Cache cargo registry & git
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-deps-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: cargo-deps-${{ runner.os }}-
+
+      - name: Cache target/
+        uses: actions/cache@v5
+        with:
+          path: target
+          key: cargo-target-${{ runner.os }}-clippy-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            cargo-target-${{ runner.os }}-clippy-
+            cargo-target-${{ runner.os }}-
+
       - name: Run clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
 
@@ -59,19 +124,53 @@ jobs:
     name: Documentation
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        uses: ./.github/actions/install-rust-toolchain
+
+      - name: Cache cargo registry & git
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-deps-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: cargo-deps-${{ runner.os }}-
+
+      - name: Cache target/
+        uses: actions/cache@v5
+        with:
+          path: target
+          key: cargo-target-${{ runner.os }}-doc-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            cargo-target-${{ runner.os }}-doc-
+            cargo-target-${{ runner.os }}-
+
       - name: Build documentation
-        run: cargo doc --no-deps --all-features
         env:
           RUSTDOCFLAGS: -D warnings
+        run: cargo doc --no-deps --all-features
 
   audit:
     name: Security Audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: rustsec/audit-check@v1
+      - uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        uses: ./.github/actions/install-rust-toolchain
+
+      - name: Cache cargo-audit binary
+        id: cargo-audit-cache
+        uses: actions/cache@v5
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          path: ~/.cargo/bin/cargo-audit
+          key: cargo-audit-${{ runner.os }}
+
+      - name: Install cargo-audit
+        if: steps.cargo-audit-cache.outputs.cache-hit != 'true'
+        run: cargo install cargo-audit --locked
+
+      - name: Run cargo audit
+        run: cargo audit
