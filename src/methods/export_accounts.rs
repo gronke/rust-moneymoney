@@ -224,6 +224,16 @@ pub struct MoneymoneyAccount {
     pub r#type: MoneymoneyAccountType,
     /// Unique account identifier.
     pub uuid: Uuid,
+    /// Unterkontomerkmal
+    pub sub_account: Option<String>,
+    /// IBAN
+    pub iban: Option<String>,
+    /// BIC
+    pub bic: Option<String>,
+    /// Comment
+    pub comment: Option<String>,
+    /// Date of balance
+    pub balance_date: Option<DateTime<Utc>>,
 }
 
 /// Export all accounts from MoneyMoney.
