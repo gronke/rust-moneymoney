@@ -151,8 +151,7 @@ pub struct MoneymoneyTransaction {
     /// SEPA-Mandatsreferenz
     pub mandate_reference: Option<String>,
     /// Comment/note attached to the transaction.
-    #[serde(default)]
-    pub comment: String,
+    pub comment: Option<String>,
 }
 
 /// Response from the export transactions operation.
