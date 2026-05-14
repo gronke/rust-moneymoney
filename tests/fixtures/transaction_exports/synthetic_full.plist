@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>creator</key>
+    <string>MoneyMoney 2.4.71</string>
+    <key>transactions</key>
+    <array>
+        <dict>
+            <key>id</key>
+            <integer>4711</integer>
+            <key>bookingDate</key>
+            <date>2026-01-15T12:00:00Z</date>
+            <key>valueDate</key>
+            <date>2026-01-15T12:00:00Z</date>
+            <key>name</key>
+            <string>ACME Test GmbH</string>
+            <key>purpose</key>
+            <string>Gehalt Januar 2026</string>
+            <key>amount</key>
+            <real>3500.00</real>
+            <key>currency</key>
+            <string>EUR</string>
+            <key>accountUuid</key>
+            <string>adcf1f45-4add-4e74-9958-a9907e0f8060</string>
+            <key>booked</key>
+            <true/>
+            <key>categoryUuid</key>
+            <string>a2fea395-d50a-41f9-913a-4a73dec89e72</string>
+            <key>checkmark</key>
+            <false/>
+            <key>comment</key>
+            <string>rust-moneymoney schema fixture</string>
+        </dict>
+    </array>
+</dict>
+</plist>
