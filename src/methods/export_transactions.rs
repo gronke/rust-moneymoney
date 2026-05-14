@@ -97,8 +97,11 @@ impl ExportTransactionsParams {
 /// A single transaction record from MoneyMoney.
 ///
 /// Contains all transaction details including dates, amount, parties, and categorization.
+///
+/// `deny_unknown_fields` makes deserialisation fail if MoneyMoney emits a key this
+/// struct doesn't model — the tripwire that backs `tests/transaction_plist_schema.rs`.
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MoneymoneyTransaction {
     /// Unique transaction identifier.
     pub id: u64,
