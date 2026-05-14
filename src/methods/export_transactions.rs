@@ -108,8 +108,34 @@ pub struct MoneymoneyTransaction {
     pub value_date: DateTime<Utc>,
     /// Name of the transaction party (payee/payer).
     pub name: String,
+    /// Account Number or IBAN of payer/payee
+    pub account_number: Option<String>,
+    /// banc code or BIC of payer/payee
+    pub bank_code: Option<String>,
+    /// business code
+    pub transaction_code: Option<u64>,
+    /// Textschlüsselergänzung
+    pub text_key_extension: Option<u64>,
+    /// SEPA-Verwendungsschlüssel
+    pub purpose_code: Option<String>,
+    /// SWIFT-Buchungsschlüssel
+    pub booking_key: Option<String>,
+    /// Primanota-Nummer
+    pub primanota_number: Option<String>,
+    /// Sammlerreferenz
+    pub batch_reference: Option<String>,
+    /// SEPA-Ende-zu-Ende-Referenz
+    pub end_to_end_reference: Option<String>,
+    /// SEPA-Gläubiger-ID
+    pub creditor_id: Option<String>,
+    /// Rückgabegrund
+    pub return_reason: Option<String>,
+    /// Kategorienname
+    pub category: Option<String>,
     /// Transaction purpose/description text.
     pub purpose: Option<String>,
+    /// Umsatzart
+    pub booking_text: Option<String>,
     /// Transaction amount (negative for expenses, positive for income).
     pub amount: f64,
     /// Currency code of the transaction.
@@ -122,6 +148,8 @@ pub struct MoneymoneyTransaction {
     pub category_uuid: Uuid,
     /// Whether the transaction has been manually checked/verified.
     pub checkmark: bool,
+    /// SEPA-Mandatsreferenz
+    pub mandate_reference: Option<String>,
     /// Comment/note attached to the transaction.
     #[serde(default)]
     pub comment: String,
