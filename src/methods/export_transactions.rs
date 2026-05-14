@@ -126,7 +126,7 @@ pub struct MoneymoneyTransaction {
     pub batch_reference: Option<String>,
     /// SEPA-Ende-zu-Ende-Referenz 
     pub end_to_end_reference: Option<String>,
-    /// SEPA-Gläubiger-ID *
+    /// SEPA-Gläubiger-ID 
     pub creditor_id: Option<String>,
     /// Rückgabegrund
     pub return_reason: Option<String>,
@@ -134,7 +134,7 @@ pub struct MoneymoneyTransaction {
     pub category: Option<String>,
     /// Transaction purpose/description text.
     pub purpose: Option<String>,
-    /// Umsatzart *
+    /// Umsatzart 
     pub booking_text: Option<String>,
     /// Transaction amount (negative for expenses, positive for income).
     pub amount: f64,
