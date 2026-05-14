@@ -124,7 +124,7 @@ pub struct MoneymoneyTransaction {
     pub primanota_number: Option<String>,
     /// Sammlerreferenz
     pub batch_reference: Option<String>,
-    /// SEPA-Ende-zu-Ende-Referenz *
+    /// SEPA-Ende-zu-Ende-Referenz 
     pub end_to_end_reference: Option<String>,
     /// SEPA-Gläubiger-ID *
     pub creditor_id: Option<String>,
