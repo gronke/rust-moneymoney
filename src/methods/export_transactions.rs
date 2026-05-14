@@ -100,17 +100,17 @@ impl ExportTransactionsParams {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct MoneymoneyTransaction {
-    /// Unique transaction identifier. *
+    /// Unique transaction identifier.
     pub id: u64,
-    /// Date the transaction was booked. *
+    /// Date the transaction was booked.
     pub booking_date: DateTime<Utc>,
-    /// Date the transaction value was applied. *
+    /// Date the transaction value was applied.
     pub value_date: DateTime<Utc>,
-    /// Name of the transaction party (payee/payer). *
+    /// Name of the transaction party (payee/payer).
     pub name: String,
-    /// Account Number or IBAN of payer/payee *
+    /// Account Number or IBAN of payer/payee
     pub account_number: Option<String>,
-    /// banc code or BIC of payer/payee *
+    /// banc code or BIC of payer/payee
     pub bank_code: Option<String>,
     /// business code
     pub transaction_code: Option<u64>,
@@ -132,22 +132,21 @@ pub struct MoneymoneyTransaction {
     pub return_reason: Option<String>,
     /// Kategorienname
     pub category: Option<String>,
-    // pub comment: Option<String>,
-    /// Transaction purpose/description text. *
+    /// Transaction purpose/description text.
     pub purpose: Option<String>,
     /// Umsatzart *
     pub booking_text: Option<String>,
-    /// Transaction amount (negative for expenses, positive for income). *
+    /// Transaction amount (negative for expenses, positive for income).
     pub amount: f64,
-    /// Currency code of the transaction. *
+    /// Currency code of the transaction.
     pub currency: String,
-    /// UUID of the account this transaction belongs to. *
+    /// UUID of the account this transaction belongs to.
     pub account_uuid: Uuid,
-    /// Whether the transaction has been booked (confirmed by bank). *
+    /// Whether the transaction has been booked (confirmed by bank).
     pub booked: bool,
-    /// UUID of the category this transaction is assigned to. *
+    /// UUID of the category this transaction is assigned to.
     pub category_uuid: Uuid,
-    /// Whether the transaction has been manually checked/verified. *
+    /// Whether the transaction has been manually checked/verified.
     pub checkmark: bool,
     /// SEPA-Mandatsreferenz
     pub mandate_reference: Option<String>,
