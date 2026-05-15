@@ -164,7 +164,8 @@ pub fn call_action(action: MoneymoneyActions) -> Result<Option<String>, osascrip
         if ($params.args) {
             $params.args['as'] = 'plist';
         }
-        return Application('MoneyMoney')[$params.method]($params.args || []);
+        var _mmRet = Application('MoneyMoney')[$params.method]($params.args || []);
+        return (_mmRet === undefined) ? null : _mmRet;
     ",
     );
     script.execute_with_params(&params)

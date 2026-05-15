@@ -36,7 +36,7 @@
 //! # }
 //! ```
 
-use crate::{call_action_plist, MoneymoneyActions};
+use crate::{call_action, Error, MoneymoneyActions};
 use serde::{Deserialize, Serialize};
 
 /// Parameters for creating a SEPA direct debit order.
@@ -185,5 +185,13 @@ pub struct CreateDirectDebitParams {
 pub fn create_direct_debit(
     params: CreateDirectDebitParams,
 ) -> Result<Vec<plist::Value>, crate::Error> {
-    call_action_plist(MoneymoneyActions::CreateDirectDebit(params))
+    let plist_response =
+        call_action(MoneymoneyActions::CreateDirectDebit(params)).map_err(Error::OsaScript)?;
+    let Some(body) = plist_response else {
+        return Ok(vec![]);
+    };
+    if body.trim().is_empty() {
+        return Ok(vec![]);
+    }
+    plist::from_bytes(body.as_bytes()).map_err(Error::Plist)
 }

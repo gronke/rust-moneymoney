@@ -34,7 +34,7 @@
 //! # }
 //! ```
 
-use crate::{call_action_plist, MoneymoneyActions};
+use crate::{call_action, Error, MoneymoneyActions};
 use serde::{Deserialize, Serialize};
 
 /// Parameters for creating a SEPA bank transfer.
@@ -159,5 +159,13 @@ pub struct CreateBankTransferParams {
 pub fn create_bank_transfer(
     params: CreateBankTransferParams,
 ) -> Result<Vec<plist::Value>, crate::Error> {
-    call_action_plist(MoneymoneyActions::CreateBankTransfer(params))
+    let plist_response =
+        call_action(MoneymoneyActions::CreateBankTransfer(params)).map_err(Error::OsaScript)?;
+    let Some(body) = plist_response else {
+        return Ok(vec![]);
+    };
+    if body.trim().is_empty() {
+        return Ok(vec![]);
+    }
+    plist::from_bytes(body.as_bytes()).map_err(Error::Plist)
 }
