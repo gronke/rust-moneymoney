@@ -289,10 +289,7 @@ fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 let accounts = if args.include_group_accounts {
                     accounts
                 } else {
-                    accounts
-                        .into_iter()
-                        .filter(|a| !a.group)
-                        .collect()
+                    accounts.into_iter().filter(|a| !a.group).collect()
                 };
                 match args.format {
                     OutputFormat::Json => {
@@ -307,17 +304,12 @@ fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 let categories = if args.include_group_categories {
                     categories
                 } else {
-                    categories
-                        .into_iter()
-                        .filter(|c| !c.group)
-                        .collect()
+                    categories.into_iter().filter(|c| !c.group).collect()
                 };
                 match args.format {
                     OutputFormat::Json => {
-                        let json = export_json_value_without_icons(
-                            &categories,
-                            args.include_icon_data,
-                        )?;
+                        let json =
+                            export_json_value_without_icons(&categories, args.include_icon_data)?;
                         write_json_pretty_stdout(&json)?;
                     }
                 }
