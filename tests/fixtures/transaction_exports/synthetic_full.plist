@@ -15,8 +15,34 @@
             <date>2026-01-15T12:00:00Z</date>
             <key>name</key>
             <string>ACME Test GmbH</string>
+            <key>accountNumber</key>
+            <string>DE89370400440532013000</string>
+            <key>bankCode</key>
+            <string>COBADEFFXXX</string>
+            <key>transactionCode</key>
+            <integer>51</integer>
+            <key>textKeyExtension</key>
+            <integer>0</integer>
+            <key>purposeCode</key>
+            <string>SALA</string>
+            <key>bookingKey</key>
+            <string>166</string>
+            <key>primanotaNumber</key>
+            <string>PN12345</string>
+            <key>batchReference</key>
+            <string>BATCH-2026-01-001</string>
+            <key>endToEndReference</key>
+            <string>EREF-202601-SALARY-001</string>
+            <key>creditorId</key>
+            <string>DE98ZZZ09999999999</string>
+            <key>returnReason</key>
+            <string></string>
+            <key>category</key>
+            <string>Gehalt</string>
             <key>purpose</key>
             <string>Gehalt Januar 2026</string>
+            <key>bookingText</key>
+            <string>GUTSCHRIFT</string>
             <key>amount</key>
             <real>3500.00</real>
             <key>currency</key>
@@ -29,6 +55,8 @@
             <string>a2fea395-d50a-41f9-913a-4a73dec89e72</string>
             <key>checkmark</key>
             <false/>
+            <key>mandateReference</key>
+            <string>MREF-2026-001</string>
             <key>comment</key>
             <string>rust-moneymoney schema fixture</string>
         </dict>
