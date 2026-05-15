@@ -49,6 +49,8 @@ enum Cmd {
 enum ExportTarget {
     /// Export accounts (balances, metadata) to stdout
     Accounts(ExportAccountsArgs),
+    /// Export categories (budgets, metadata) to stdout
+    Categories(ExportCategoriesArgs),
     /// Export transactions for a date range to stdout
     Transactions(ExportTransactionsArgs),
 }
@@ -91,6 +93,46 @@ struct ExportAccountsArgs {
                      accounts (giro, savings, credit card, etc.) are exported."
     )]
     include_group_accounts: bool,
+}
+
+#[derive(Args)]
+#[clap(
+    about = "Export categories and budgets to stdout",
+    long_about = "Export categories and budgets to stdout.
+
+Output encoding is selected with `--format` (default: json). By default, category groups \
+(organizational folders) and per-category icon bytes are omitted. Use the flags below to \
+include them.",
+    after_help = "EXAMPLES:
+    moneymoney export categories
+    moneymoney export categories --include-group-categories
+    moneymoney export categories --include-icon-data"
+)]
+struct ExportCategoriesArgs {
+    /// Output serialization format (`json` by default)
+    #[clap(
+        long,
+        arg_enum,
+        default_value_t = OutputFormat::Json,
+        long_help = EXPORT_FORMAT_LONG_HELP
+    )]
+    format: OutputFormat,
+    /// Include per-category icon bytes (omitted by default)
+    #[clap(
+        long = "include-icon-data",
+        help = "Include per-category icon bytes (omitted by default)",
+        long_help = "Include the `icon` field (raw image bytes) for each category. Omitted by default because \
+                     payloads are large."
+    )]
+    include_icon_data: bool,
+    /// Include category groups (omitted by default)
+    #[clap(
+        long = "include-group-categories",
+        help = "Include category groups / folders (omitted by default)",
+        long_help = "Include category groups (`group: true`) in the output. Omitted by default; only real \
+                     categories are exported."
+    )]
+    include_group_categories: bool,
 }
 
 #[derive(Args)]
@@ -183,12 +225,12 @@ fn write_json_pretty_stdout<T: Serialize>(
     Ok(())
 }
 
-/// Serialize accounts for CLI JSON: drop `icon` unless `--include-icon-data` was passed.
-fn export_accounts_json_value(
-    accounts: &[moneymoney::export_accounts::MoneymoneyAccount],
+/// Serialize export items for CLI JSON: drop `icon` unless `--include-icon-data` was passed.
+fn export_json_value_without_icons<T: Serialize>(
+    items: &[T],
     include_icon_data: bool,
 ) -> Result<serde_json::Value, serde_json::Error> {
-    let mut v = serde_json::to_value(accounts)?;
+    let mut v = serde_json::to_value(items)?;
     if !include_icon_data {
         if let Some(items) = v.as_array_mut() {
             for item in items {
@@ -254,7 +296,28 @@ fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 };
                 match args.format {
                     OutputFormat::Json => {
-                        let json = export_accounts_json_value(&accounts, args.include_icon_data)?;
+                        let json =
+                            export_json_value_without_icons(&accounts, args.include_icon_data)?;
+                        write_json_pretty_stdout(&json)?;
+                    }
+                }
+            }
+            ExportTarget::Categories(args) => {
+                let categories = moneymoney::export_categories()?;
+                let categories = if args.include_group_categories {
+                    categories
+                } else {
+                    categories
+                        .into_iter()
+                        .filter(|c| !c.group)
+                        .collect()
+                };
+                match args.format {
+                    OutputFormat::Json => {
+                        let json = export_json_value_without_icons(
+                            &categories,
+                            args.include_icon_data,
+                        )?;
                         write_json_pretty_stdout(&json)?;
                     }
                 }
