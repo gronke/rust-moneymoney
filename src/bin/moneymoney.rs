@@ -14,6 +14,11 @@ use clap::{ArgEnum, Args, Parser, Subcommand};
 use moneymoney::export_transactions::ExportTransactionsParams;
 use serde::Serialize;
 
+/// Clap `long_help` for the `--format` flag on export subcommands.
+const EXPORT_FORMAT_LONG_HELP: &str =
+    "Serialization format written to stdout. `json` is the default; additional formats \
+     (e.g. CSV) may be added in future releases.";
+
 #[derive(Parser)]
 #[clap(
     name = "moneymoney",
@@ -42,43 +47,111 @@ enum Cmd {
 
 #[derive(Subcommand)]
 enum ExportTarget {
-    /// Export accounts (balances, metadata) as JSON
+    /// Export accounts (balances, metadata) to stdout
     Accounts(ExportAccountsArgs),
-    /// Export transactions as JSON (or other formats)
+    /// Export transactions for a date range to stdout
     Transactions(ExportTransactionsArgs),
 }
 
 #[derive(Args)]
+#[clap(
+    about = "Export account balances and metadata to stdout",
+    long_about = "Export account balances and metadata to stdout.
+
+Output encoding is selected with `--format` (default: json). By default, account groups \
+(organizational folders) and per-account icon bytes are omitted. Use the flags below to \
+include them.",
+    after_help = "EXAMPLES:
+    moneymoney export accounts
+    moneymoney export accounts --include-group-accounts
+    moneymoney export accounts --include-icon-data"
+)]
 struct ExportAccountsArgs {
-    /// Output encoding
-    #[clap(long, arg_enum, default_value_t = OutputFormat::Json)]
+    /// Output serialization format (`json` by default)
+    #[clap(
+        long,
+        arg_enum,
+        default_value_t = OutputFormat::Json,
+        long_help = EXPORT_FORMAT_LONG_HELP
+    )]
     format: OutputFormat,
-    /// Include per-account icon bytes in JSON (large; omitted by default)
-    #[clap(long = "include-icon-data")]
+    /// Include per-account icon bytes (omitted by default)
+    #[clap(
+        long = "include-icon-data",
+        help = "Include per-account icon bytes (omitted by default)",
+        long_help = "Include the `icon` field (raw image bytes) for each account. Omitted by default because \
+                     payloads are large."
+    )]
     include_icon_data: bool,
+    /// Include account groups (omitted by default)
+    #[clap(
+        long = "include-group-accounts",
+        help = "Include account groups / folders (omitted by default)",
+        long_help = "Include account groups (`group: true`) in the output. Omitted by default; only real \
+                     accounts (giro, savings, credit card, etc.) are exported."
+    )]
+    include_group_accounts: bool,
 }
 
 #[derive(Args)]
+#[clap(
+    about = "Export transactions for a date range to stdout",
+    long_about = "Export transactions for a date range to stdout.
+
+Output encoding is selected with `--format` (default: json). `--from-date` is required. \
+Other filters are optional; when omitted, MoneyMoney applies its own defaults (e.g. no \
+end date limit, all accounts, all categories).",
+    after_help = "EXAMPLES:
+    moneymoney export transactions --from-date 2024-01-01
+    moneymoney export transactions --from-date 2024-01-01 --to-date 2024-12-31
+    moneymoney export transactions --from-date 2024-06-01 --from-account <uuid-or-iban>"
+)]
 struct ExportTransactionsArgs {
-    /// Inclusive start date (YYYY-MM-DD)
-    #[clap(long = "from-date", value_name = "YYYY-MM-DD")]
+    /// Inclusive start of the date range (YYYY-MM-DD)
+    #[clap(
+        long = "from-date",
+        value_name = "YYYY-MM-DD",
+        long_help = "Inclusive start date of the export range, in ISO 8601 calendar form (YYYY-MM-DD)."
+    )]
     from_date: String,
-    /// Inclusive end date (YYYY-MM-DD)
-    #[clap(long = "to-date", value_name = "YYYY-MM-DD")]
+    /// Inclusive end of the date range (YYYY-MM-DD)
+    #[clap(
+        long = "to-date",
+        value_name = "YYYY-MM-DD",
+        long_help = "Inclusive end date of the export range (YYYY-MM-DD). When omitted, MoneyMoney does not \
+                     set an upper date bound."
+    )]
     to_date: Option<String>,
-    /// Filter by account UUID or IBAN
-    #[clap(long = "from-account")]
+    /// Restrict to one account (UUID or IBAN)
+    #[clap(
+        long = "from-account",
+        value_name = "UUID|IBAN",
+        long_help = "Only return transactions for this account. Accepts a MoneyMoney account UUID or IBAN. \
+                     When omitted, transactions from all accounts are included."
+    )]
     from_account: Option<String>,
-    /// Filter by category name
-    #[clap(long = "from-category")]
+    /// Restrict to one category name
+    #[clap(
+        long = "from-category",
+        value_name = "NAME",
+        long_help = "Only return transactions assigned to this category name. When omitted, all categories \
+                     are included."
+    )]
     from_category: Option<String>,
-    /// Output encoding
-    #[clap(long, arg_enum, default_value_t = OutputFormat::Json)]
+    /// Output serialization format (`json` by default)
+    #[clap(
+        long,
+        arg_enum,
+        default_value_t = OutputFormat::Json,
+        long_help = EXPORT_FORMAT_LONG_HELP
+    )]
     format: OutputFormat,
 }
 
+/// Output encoding for export subcommands.
 #[derive(ArgEnum, Clone, Copy, PartialEq, Eq)]
 enum OutputFormat {
+    /// Pretty-printed JSON (default)
     Json,
 }
 
@@ -171,6 +244,14 @@ fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         Cmd::Export { target } => match target {
             ExportTarget::Accounts(args) => {
                 let accounts = moneymoney::export_accounts()?;
+                let accounts = if args.include_group_accounts {
+                    accounts
+                } else {
+                    accounts
+                        .into_iter()
+                        .filter(|a| !a.group)
+                        .collect()
+                };
                 match args.format {
                     OutputFormat::Json => {
                         let json = export_accounts_json_value(&accounts, args.include_icon_data)?;
