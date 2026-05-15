@@ -181,7 +181,10 @@ fn test_roundtrip_add_read_modify_transactions() {
         .iter()
         .filter(|t| {
             test_accounts.iter().any(|a| a.uuid == t.account_uuid)
-                && t.comment.contains("Automated test")
+                && t.comment
+                    .as_deref()
+                    .map(|c| c.contains("Automated test"))
+                    .unwrap_or(false)
         })
         .count();
 
@@ -272,7 +275,10 @@ fn test_modify_transaction_category() {
         {
             // Note: Comment may be empty or contain our text depending on race conditions
             // We just verify the modification call succeeded
-            println!("[ok] Verified transaction modified, comment: '{}'", modified.comment);
+            println!(
+                "[ok] Verified transaction modified, comment: '{}'",
+                modified.comment.as_deref().unwrap_or("")
+            );
         }
 
         println!("OK: Modification test passed.");
@@ -383,11 +389,15 @@ fn test_modification_persistence() {
             .find(|t| t.id == transaction.id)
         {
             // Just verify the transaction exists and has been modified
-            println!("[ok] Transaction found with comment: '{}'", found.comment);
+            println!(
+                "[ok] Transaction found with comment: '{}'",
+                found.comment.as_deref().unwrap_or("")
+            );
             // In single-test mode, the unique comment would persist
             // In parallel mode, another test might overwrite it
             assert!(
-                !found.comment.is_empty() || unique_comment.contains("Persistence"),
+                found.comment.as_ref().map_or(false, |c| !c.is_empty())
+                    || unique_comment.contains("Persistence"),
                 "Comment should exist after modification"
             );
         } else {
