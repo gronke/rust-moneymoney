@@ -1,6 +1,20 @@
 [workspace]
 members = ["moneymoney-cli"]
 
+# Single source of truth for external dependency versions used by any
+# workspace member. Members opt in via `<crate>.workspace = true` and may
+# add features per-member; the version pin lives here.
+[workspace.dependencies]
+chrono = "0.4"
+clap = "4.6"
+iso_currency = "0.5"
+osascript = "0.3"
+plist = "1.9"
+serde = "1.0"
+serde_json = "1.0"
+thiserror = "2.0"
+uuid = "1.23"
+
 [package]
 name = "moneymoney"
 version = "0.2.0"
@@ -20,16 +34,16 @@ include = ["src/**", "LICENSE", "README.md"]
 all-features = true
 
 [dependencies]
-chrono = { version = "0.4", features = ["serde"] }
-iso_currency = { version = "0.5", features = ["with-serde"] }
-osascript = "0.3"
-plist = "1.9"
-serde = { version = "1.0", features = ["derive"] }
-thiserror = "2.0"
-uuid = { version = "1.23", features = ["serde", "v4"] }
+chrono = { workspace = true, features = ["serde"] }
+iso_currency = { workspace = true, features = ["with-serde"] }
+osascript.workspace = true
+plist.workspace = true
+serde = { workspace = true, features = ["derive"] }
+thiserror.workspace = true
+uuid = { workspace = true, features = ["serde", "v4"] }
 
 [dev-dependencies]
-serde_json = "1.0"
+serde_json.workspace = true
 
 [features]
 experimental = []
