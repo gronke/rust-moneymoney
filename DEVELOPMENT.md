@@ -2,17 +2,30 @@
 
 Working on the `moneymoney` crate itself. End-user / library-consumer docs live in [README.md](README.md).
 
+## Workspace layout
+
+This repository is a Cargo workspace with two crates:
+
+- **`moneymoney`** (root) — the library. MSRV `1.62`. No `clap` dependency.
+- **`moneymoney-cli`** (`moneymoney-cli/`) — the CLI binary (`moneymoney`).
+  MSRV `1.85`, depends on `moneymoney` via path + version.
+
+The split keeps the library's dependency footprint small for downstream
+consumers and lets the CLI use a newer toolchain without dragging the
+library along.
+
 ## Quality checks
 
 ```bash
-make check     # everything below
+make check          # everything below
 
-make test      # unit and doc tests
-make lint      # clippy
-make fmt       # rustfmt
-make doc       # build documentation
-make audit     # security audit
-make all       # format and check
+make test           # lib unit/doc tests + CLI tests
+make lint           # clippy across the workspace
+make fmt            # rustfmt across the workspace
+make version-check  # lib ↔ CLI version alignment
+make doc            # build documentation (library only)
+make audit          # security audit
+make all            # format and check
 ```
 
 ## Testing
@@ -87,3 +100,45 @@ catching drift in production data the fixture corpus may not yet exercise.
 ```bash
 cargo test --test transaction_plist_schema -- --ignored
 ```
+
+## Releasing
+
+The two crates are versioned **independently but manually aligned**: the
+CLI tracks the library. Every library release implies a CLI release of
+equal or greater bump; the CLI may also release on its own between
+library releases for CLI-only changes (new subcommand, output format, …).
+
+The CI job `Version Alignment` (`scripts/check_version_alignment.py`,
+also run by `make version-check`) enforces two invariants on every PR
+and push to `main`:
+
+1. `moneymoney-cli`'s `[dependencies] moneymoney = { version = "..." }`
+   must match the library's current major.minor.
+2. `moneymoney-cli`'s package version must be ≥ the library's version.
+
+So bumping the library without also bumping the CLI (and its dep pin)
+fails CI immediately.
+
+### Checklist
+
+1. Decide the library bump (patch / minor / major) following SemVer.
+2. Decide the CLI bump — must be **at least** the library's bump level.
+   For library-only releases without CLI source changes, this is still a
+   CLI patch bump so the published binary pins the fresh lib version.
+3. Update three places in lockstep:
+   - `Cargo.toml` → `[package] version`
+   - `moneymoney-cli/Cargo.toml` → `[package] version`
+   - `moneymoney-cli/Cargo.toml` → `[dependencies] moneymoney = { version = "X.Y" }`
+4. Run `make check` locally — `version-check` must pass.
+5. Update `CHANGELOG.md` (if present) for both crates.
+6. Commit with a message naming both versions, e.g.
+   `chore: release moneymoney 0.3.0 + moneymoney-cli 0.3.0`.
+7. Tag both releases on the commit:
+   `git tag moneymoney-v0.3.0 moneymoney-cli-v0.3.0`.
+8. Publish **library first**, then **CLI** (the CLI's `version = "..."`
+   pin on `moneymoney` resolves against crates.io at publish time):
+   ```bash
+   cargo publish -p moneymoney
+   cargo publish -p moneymoney-cli
+   ```
+9. Push the commit and tags.

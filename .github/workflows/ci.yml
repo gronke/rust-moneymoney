@@ -123,6 +123,15 @@ jobs:
       - name: Check formatting
         run: cargo fmt --all -- --check
 
+  version-align:
+    name: Version Alignment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check workspace version alignment
+        run: ./scripts/check_version_alignment.py
+
   clippy:
     name: Clippy
     runs-on: macos-latest
