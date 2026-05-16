@@ -12,8 +12,8 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  publish:
-    name: Publish to crates.io
+  release:
+    name: Validate tag and draft GitHub Release
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v6
@@ -42,10 +42,9 @@ jobs:
       - name: Run tests
         run: cargo test --all-features
 
-      - name: Publish to crates.io
-        env:
-          CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
-        run: cargo publish --token "${CRATES_TOKEN}"
+      # Publishing to crates.io is intentionally manual (`cargo publish`
+      # run locally by a maintainer). See DEVELOPMENT.md for the
+      # release flow.
 
       - name: Create GitHub Release
         env:
