@@ -25,7 +25,7 @@ A safe, ergonomic Rust interface to the [MoneyMoney](https://moneymoney-app.com/
 
 ```toml
 [dependencies]
-moneymoney = "0.2"
+moneymoney = "0.3"
 ```
 
 For a lean dependency tree (no clap, no serde_json runtime dep), opt
@@ -33,7 +33,7 @@ out of default features:
 
 ```toml
 [dependencies]
-moneymoney = { version = "0.2", default-features = false }
+moneymoney = { version = "0.3", default-features = false }
 ```
 
 ### Command-line tool
@@ -153,7 +153,7 @@ match moneymoney::export_accounts() {
 
 ```toml
 [dependencies]
-moneymoney = { version = "0.2", features = ["experimental"] }
+moneymoney = { version = "0.3", features = ["experimental"] }
 ```
 
 ## Documentation
