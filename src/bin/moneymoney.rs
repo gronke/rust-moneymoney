@@ -2,12 +2,10 @@
 //!
 //! Build with `--features experimental` to enable `create bank-transfer`.
 
-#[cfg(feature = "experimental")]
-use std::io::Read;
 use std::io::{self, Write};
-#[cfg(feature = "experimental")]
-use std::path::PathBuf;
 use std::str::FromStr;
+#[cfg(feature = "experimental")]
+use std::{io::Read, path::PathBuf};
 
 use chrono::NaiveDate;
 use clap::{ArgEnum, Args, Parser, Subcommand};
