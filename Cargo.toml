@@ -29,7 +29,7 @@ uuid = { version = "1.23", features = ["serde", "v4"] }
 
 [[bin]]
 name = "moneymoney"
-path = "src/bin/moneymoney.rs"
+path = "src/bin/moneymoney/main.rs"
 required-features = ["cli"]
 
 [dev-dependencies]
