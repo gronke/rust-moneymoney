@@ -3,7 +3,6 @@
 //! Build with `--features experimental` to enable `create bank-transfer`.
 
 use std::io::{self, Write};
-use std::str::FromStr;
 #[cfg(feature = "experimental")]
 use std::{io::Read, path::PathBuf};
 
@@ -153,7 +152,7 @@ struct ExportTransactionsArgs {
         value_name = "YYYY-MM-DD",
         long_help = "Inclusive start date of the export range, in ISO 8601 calendar form (YYYY-MM-DD)."
     )]
-    from_date: String,
+    from_date: NaiveDate,
     /// Inclusive end of the date range (YYYY-MM-DD)
     #[clap(
         long = "to-date",
@@ -161,7 +160,7 @@ struct ExportTransactionsArgs {
         long_help = "Inclusive end date of the export range (YYYY-MM-DD). When omitted, MoneyMoney does not \
                      set an upper date bound."
     )]
-    to_date: Option<String>,
+    to_date: Option<NaiveDate>,
     /// Restrict to one account (UUID or IBAN)
     #[clap(
         long = "from-account",
@@ -208,10 +207,6 @@ enum CreateTarget {
 struct BankTransferArgs {
     /// Path to JSON parameters, or `-` / omit for stdin
     file: Option<PathBuf>,
-}
-
-fn parse_naive_date(label: &str, s: &str) -> Result<NaiveDate, String> {
-    NaiveDate::from_str(s).map_err(|e| format!("{label}: invalid date `{s}`: {e}"))
 }
 
 fn write_json_pretty_stdout<T: Serialize>(
@@ -313,17 +308,10 @@ fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 }
             }
             ExportTarget::Transactions(args) => {
-                let from_date = parse_naive_date("--from-date", &args.from_date)?;
-                let mut params = ExportTransactionsParams::new(from_date);
-                if let Some(ref s) = args.to_date {
-                    params.to_date = Some(parse_naive_date("--to-date", s)?);
-                }
-                if let Some(a) = args.from_account {
-                    params.from_account = Some(a);
-                }
-                if let Some(c) = args.from_category {
-                    params.from_category = Some(c);
-                }
+                let mut params = ExportTransactionsParams::new(args.from_date);
+                params.to_date = args.to_date;
+                params.from_account = args.from_account;
+                params.from_category = args.from_category;
                 let response = moneymoney::export_transactions(params)?;
                 match args.format {
                     OutputFormat::Json => write_json_pretty_stdout(&response)?,
