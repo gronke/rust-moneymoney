@@ -139,6 +139,9 @@ fails CI immediately.
    pin on `moneymoney` resolves against crates.io at publish time):
    ```bash
    cargo publish -p moneymoney
+   # Wait ~30s for the registry to propagate before the next step
    cargo publish -p moneymoney-cli
    ```
+   If the CLI publish fails with "no matching version", the registry
+   hasn't propagated yet — wait and retry.
 9. Push the commit and tags.
