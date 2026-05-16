@@ -8,7 +8,7 @@ use std::str::FromStr;
 use std::{io::Read, path::PathBuf};
 
 use chrono::NaiveDate;
-use clap::{ArgEnum, Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 use moneymoney::export_transactions::ExportTransactionsParams;
 use serde::Serialize;
 
@@ -70,7 +70,7 @@ struct ExportAccountsArgs {
     /// Output serialization format (`json` by default)
     #[clap(
         long,
-        arg_enum,
+        value_enum,
         default_value_t = OutputFormat::Json,
         long_help = EXPORT_FORMAT_LONG_HELP
     )]
@@ -110,7 +110,7 @@ struct ExportCategoriesArgs {
     /// Output serialization format (`json` by default)
     #[clap(
         long,
-        arg_enum,
+        value_enum,
         default_value_t = OutputFormat::Json,
         long_help = EXPORT_FORMAT_LONG_HELP
     )]
@@ -181,7 +181,7 @@ struct ExportTransactionsArgs {
     /// Output serialization format (`json` by default)
     #[clap(
         long,
-        arg_enum,
+        value_enum,
         default_value_t = OutputFormat::Json,
         long_help = EXPORT_FORMAT_LONG_HELP
     )]
@@ -189,7 +189,7 @@ struct ExportTransactionsArgs {
 }
 
 /// Output encoding for export subcommands.
-#[derive(ArgEnum, Clone, Copy, PartialEq, Eq)]
+#[derive(ValueEnum, Clone, Copy, PartialEq, Eq)]
 enum OutputFormat {
     /// Pretty-printed JSON (default)
     Json,
