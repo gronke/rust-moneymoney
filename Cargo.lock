@@ -380,7 +380,6 @@ name = "moneymoney"
 version = "0.2.0"
 dependencies = [
  "chrono",
- "clap",
  "iso_currency",
  "osascript",
  "plist",
@@ -388,6 +387,17 @@ dependencies = [
  "serde_json",
  "thiserror",
  "uuid",
+]
+
+[[package]]
+name = "moneymoney-cli"
+version = "0.2.0"
+dependencies = [
+ "chrono",
+ "clap",
+ "moneymoney",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

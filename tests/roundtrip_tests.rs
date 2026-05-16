@@ -396,7 +396,7 @@ fn test_modification_persistence() {
             // In single-test mode, the unique comment would persist
             // In parallel mode, another test might overwrite it
             assert!(
-                found.comment.as_ref().is_some_and(|c| !c.is_empty())
+                found.comment.as_ref().map_or(false, |c| !c.is_empty())
                     || unique_comment.contains("Persistence"),
                 "Comment should exist after modification"
             );

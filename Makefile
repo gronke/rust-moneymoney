@@ -14,15 +14,17 @@ help:
 
 # Run tests
 test:
-	@echo "Running unit tests..."
+	@echo "Running library unit tests..."
 	@cargo test --lib
-	@echo "\nRunning doc tests..."
+	@echo "\nRunning library doc tests..."
 	@cargo test --doc
+	@echo "\nRunning CLI tests..."
+	@cargo test -p moneymoney-cli --all-features
 
 # Run clippy linter
 lint:
 	@echo "Running clippy..."
-	@cargo clippy --all-targets --all-features -- -D warnings
+	@cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 # Format code
 fmt:

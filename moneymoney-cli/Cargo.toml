@@ -1,0 +1,27 @@
+[package]
+name = "moneymoney-cli"
+version = "0.2.0"
+rust-version = "1.85"
+description = "Command-line interface to the MoneyMoney macOS app (uses the moneymoney crate)"
+authors = ["Stefan Grönke <stefan@gronke.net>"]
+homepage = "https://github.com/gronke/rust-moneymoney"
+repository = "https://github.com/gronke/rust-moneymoney"
+readme = "../README.md"
+license = "MIT"
+keywords = ["moneymoney", "cli", "macos"]
+categories = ["command-line-utilities", "finance"]
+edition = "2021"
+
+[[bin]]
+name = "moneymoney"
+path = "src/main.rs"
+
+[dependencies]
+chrono = "0.4"
+clap = { version = "4.6", features = ["derive"] }
+moneymoney = { path = "..", version = "0.2" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[features]
+experimental = ["moneymoney/experimental"]

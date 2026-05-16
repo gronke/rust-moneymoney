@@ -39,7 +39,7 @@ jobs:
             cargo-target-${{ runner.os }}-check-
 
       - name: Check compilation
-        run: cargo check --all-features
+        run: cargo check --workspace --all-features
 
       - name: Save cargo registry & git
         if: github.event_name == 'push'
@@ -84,11 +84,14 @@ jobs:
             cargo-target-${{ runner.os }}-test-${{ hashFiles('**/Cargo.lock') }}-
             cargo-target-${{ runner.os }}-test-
 
-      - name: Run unit tests
+      - name: Run unit tests (library)
         run: cargo test --lib
 
-      - name: Run doc tests
+      - name: Run doc tests (library)
         run: cargo test --doc
+
+      - name: Run CLI tests
+        run: cargo test -p moneymoney-cli --all-features
 
       - name: Save cargo registry & git
         if: github.event_name == 'push'
@@ -150,7 +153,7 @@ jobs:
             cargo-target-${{ runner.os }}-clippy-
 
       - name: Run clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
 
       - name: Save cargo registry & git
         if: github.event_name == 'push'
