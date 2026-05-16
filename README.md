@@ -142,44 +142,11 @@ moneymoney = { version = "0.2", features = ["experimental"] }
 - **API Documentation**: [docs.rs/moneymoney](https://docs.rs/moneymoney)
 - **MoneyMoney AppleScript API**: [moneymoney-app.com/api](https://moneymoney-app.com/api/)
 
-## Testing
-
-### Unit Tests
-
-```bash
-cargo test --lib
-```
-
-### Integration Tests
-
-Integration tests require MoneyMoney to be running with two test accounts:
-
-1. Create offline accounts named `test-cash` (Cash) and `test-checking` (Giro) in EUR
-2. Run: `cargo test --test roundtrip_tests -- --ignored --nocapture --test-threads=1`
-3. Clean up test accounts when done
-
-Tests only modify `test-` prefixed accounts and never touch your real data.
-
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-### Development Commands
-
-```bash
-# Run all quality checks
-make check
-
-# Individual commands
-make test      # Run unit and doc tests
-make lint      # Run clippy
-make fmt       # Format code
-make doc       # Build documentation
-make audit     # Security audit
-
-# Format and check
-make all
-```
+Contributions are welcome — please open a Pull Request. See
+[DEVELOPMENT.md](DEVELOPMENT.md) for the test layout (unit, integration,
+schema-drift) and the `make` quality-check targets.
 
 ## License
 
