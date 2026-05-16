@@ -21,12 +21,31 @@ A safe, ergonomic Rust interface to the [MoneyMoney](https://moneymoney-app.com/
 
 ## Installation
 
-Add this to your `Cargo.toml`:
+### Library
 
 ```toml
 [dependencies]
 moneymoney = "0.2"
 ```
+
+For a lean dependency tree (no clap, no serde_json runtime dep), opt
+out of default features:
+
+```toml
+[dependencies]
+moneymoney = { version = "0.2", default-features = false }
+```
+
+### Command-line tool
+
+```sh
+cargo install moneymoney
+```
+
+The `cli` feature is enabled by default, so `cargo install` produces
+the `moneymoney` binary without extra flags. Pass
+`--features experimental` to also enable the (in-progress) `create
+bank-transfer` subcommand.
 
 ## Quick Start
 

@@ -2,6 +2,19 @@
 
 Working on the `moneymoney` crate itself. End-user / library-consumer docs live in [README.md](README.md).
 
+## Cargo features
+
+| Feature | Default? | Effect |
+|---|---|---|
+| `cli` | yes | Pulls `clap` and `serde_json` as runtime deps; gates the `moneymoney` binary at `src/bin/moneymoney/main.rs` via `required-features = ["cli"]`. |
+| `experimental` | no | Exposes WIP library APIs (`create_bank_transfer`, `create_direct_debit`) and the matching `create` subcommands in the CLI. |
+| `test-utils` | no | Internal test scaffolding (`src/test_utils.rs`). |
+
+Library consumers who don't want the CLI's runtime deps in their tree
+should set `default-features = false` (see README). The `cli` feature
+exists so that `cargo install moneymoney` works without flags while
+still letting library consumers opt out.
+
 ## Quality checks
 
 ```bash
