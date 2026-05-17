@@ -47,6 +47,26 @@ the `moneymoney` binary without extra flags. Pass
 `--features experimental` to also enable the (in-progress) `create
 bank-transfer` subcommand.
 
+### Pre-built binary
+
+Download the archive for your Mac's CPU architecture from
+[GitHub Releases](https://github.com/gronke/rust-moneymoney/releases)
+(`aarch64-apple-darwin` for Apple Silicon, `x86_64-apple-darwin` for
+Intel). Extract and run:
+
+```sh
+tar -xzf moneymoney-*.tar.gz
+xattr -d com.apple.quarantine moneymoney   # if Gatekeeper complains
+./moneymoney --help
+```
+
+Verify the download against the `SHA256SUMS` file published alongside
+the archives:
+
+```sh
+shasum -a 256 -c SHA256SUMS
+```
+
 ## Quick Start
 
 ```rust

@@ -42,11 +42,40 @@ jobs:
       - name: Run tests
         run: cargo test --all-features
 
+      - name: Add x86_64-apple-darwin target
+        run: rustup target add x86_64-apple-darwin
+
+      - name: Build release binaries
+        run: |
+          cargo build --release --features cli --bin moneymoney
+          cargo build --release --features cli --bin moneymoney \
+            --target x86_64-apple-darwin
+
+      - name: Strip binaries
+        run: |
+          strip target/release/moneymoney
+          strip target/x86_64-apple-darwin/release/moneymoney
+
+      - name: Package archives and checksums
+        run: |
+          mkdir -p dist
+          tar -C target/release \
+            -czf "dist/moneymoney-${GITHUB_REF_NAME}-aarch64-apple-darwin.tar.gz" \
+            moneymoney
+          tar -C target/x86_64-apple-darwin/release \
+            -czf "dist/moneymoney-${GITHUB_REF_NAME}-x86_64-apple-darwin.tar.gz" \
+            moneymoney
+          ( cd dist && shasum -a 256 *.tar.gz > SHA256SUMS )
+
       # Publishing to crates.io is intentionally manual (`cargo publish`
       # run locally by a maintainer). See DEVELOPMENT.md for the
       # release flow.
 
-      - name: Create GitHub Release
+      - name: Create GitHub Release with binaries
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "${GITHUB_REF_NAME}" --generate-notes
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --generate-notes \
+            dist/*.tar.gz \
+            dist/SHA256SUMS
