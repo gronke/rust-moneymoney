@@ -38,13 +38,33 @@ cargo test --lib
 
 ### Integration tests
 
-Integration tests require MoneyMoney to be running with two test accounts:
+Integration tests are `#[ignore]`-gated and require a running MoneyMoney
+with seeded test accounts.
 
-1. Create offline accounts named `test-cash` (Cash) and `test-checking` (Giro) in EUR.
-2. Run: `cargo test --test roundtrip_tests -- --ignored --nocapture --test-threads=1`
-3. Clean up test accounts when done.
+```bash
+cargo test --test roundtrip_tests -- --ignored --nocapture --test-threads=1
+```
 
-Tests only modify `test-` prefixed accounts and never touch real data.
+Tests only touch `test-` prefixed accounts and never modify real data.
+
+**Seeding accounts** (one-time): `scripts/create_test_accounts.sh` creates
+the six offline accounts the tests expect, one per type the API can
+deserialise:
+
+- `test-cash` (Cash account)
+- `test-giro` (Giro account)
+- `test-savings` (Savings account)
+- `test-fixed-term` (Fixed term deposit)
+- `test-loan` (Loan account)
+- `test-creditcard` (Credit card)
+
+`scripts/delete_test_accounts.sh` removes them when you're done.
+
+**Isolated database** (recommended if you don't want to risk touching
+your production MoneyMoney data): `scripts/run_test_moneymoney.sh` backs
+up your production container and launches MoneyMoney pointed at an
+isolated sandbox under `.test_data/`. When done,
+`scripts/restore_production_moneymoney.sh` swaps back.
 
 ### Schema-drift tests
 
