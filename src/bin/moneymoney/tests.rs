@@ -119,6 +119,43 @@ fn export_transactions_requires_from_date() {
 }
 
 #[test]
+fn parses_export_portfolio_no_filters() {
+    let cli = Cli::try_parse_from(["moneymoney", "export", "portfolio"]).unwrap();
+    let Cmd::Export {
+        target: ExportTarget::Portfolio(args),
+    } = cli.command
+    else {
+        panic!("expected Export::Portfolio");
+    };
+    assert!(args.from_account.is_none());
+    assert!(args.from_asset_class.is_none());
+}
+
+#[test]
+fn parses_export_portfolio_with_filters() {
+    let cli = Cli::try_parse_from([
+        "moneymoney",
+        "export",
+        "portfolio",
+        "--from-account",
+        "DE89370400440532013000",
+        "--from-asset-class",
+        "Aktien",
+        "--format",
+        "json",
+    ])
+    .unwrap();
+    let Cmd::Export {
+        target: ExportTarget::Portfolio(args),
+    } = cli.command
+    else {
+        panic!("expected Export::Portfolio");
+    };
+    assert_eq!(args.from_account.as_deref(), Some("DE89370400440532013000"));
+    assert_eq!(args.from_asset_class.as_deref(), Some("Aktien"));
+}
+
+#[test]
 fn unknown_subcommand_is_rejected() {
     let result = Cli::try_parse_from(["moneymoney", "expert"]);
     let err = match result {

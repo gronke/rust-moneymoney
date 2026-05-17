@@ -8,6 +8,7 @@ use std::{io::Read, path::PathBuf};
 
 use chrono::NaiveDate;
 use clap::{Args, Parser, Subcommand, ValueEnum};
+use moneymoney::export_portfolio::ExportPortfolioParams;
 use moneymoney::export_transactions::ExportTransactionsParams;
 use serde::Serialize;
 
@@ -50,6 +51,8 @@ enum ExportTarget {
     Categories(ExportCategoriesArgs),
     /// Export transactions for a date range to stdout
     Transactions(ExportTransactionsArgs),
+    /// Export portfolio securities (holdings, market values) to stdout
+    Portfolio(ExportPortfolioArgs),
 }
 
 #[derive(Args)]
@@ -187,6 +190,45 @@ struct ExportTransactionsArgs {
     format: OutputFormat,
 }
 
+#[derive(Args)]
+#[clap(
+    about = "Export portfolio securities (holdings, market values) to stdout",
+    long_about = "Export portfolio securities (holdings, market values) to stdout.
+
+Output encoding is selected with `--format` (default: json). With no filters, all securities \
+from all portfolio accounts are returned. Filters are optional and can be combined.",
+    after_help = "EXAMPLES:
+    moneymoney export portfolio
+    moneymoney export portfolio --from-account <uuid-or-iban>
+    moneymoney export portfolio --from-asset-class Aktien"
+)]
+struct ExportPortfolioArgs {
+    /// Restrict to one account (UUID or IBAN)
+    #[clap(
+        long = "from-account",
+        value_name = "UUID|IBAN",
+        long_help = "Only return securities held in this account. Accepts a MoneyMoney account UUID or IBAN. \
+                     When omitted, securities from all portfolio accounts are included."
+    )]
+    from_account: Option<String>,
+    /// Restrict to one asset class
+    #[clap(
+        long = "from-asset-class",
+        value_name = "NAME",
+        long_help = "Only return securities in this asset class (as configured in MoneyMoney). When omitted, \
+                     all asset classes are included."
+    )]
+    from_asset_class: Option<String>,
+    /// Output serialization format (`json` by default)
+    #[clap(
+        long,
+        value_enum,
+        default_value_t = OutputFormat::Json,
+        long_help = EXPORT_FORMAT_LONG_HELP
+    )]
+    format: OutputFormat,
+}
+
 /// Output encoding for export subcommands.
 #[derive(ValueEnum, Clone, Copy, PartialEq, Eq)]
 enum OutputFormat {
@@ -313,6 +355,15 @@ fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 params.from_account = args.from_account;
                 params.from_category = args.from_category;
                 let response = moneymoney::export_transactions(params)?;
+                match args.format {
+                    OutputFormat::Json => write_json_pretty_stdout(&response)?,
+                }
+            }
+            ExportTarget::Portfolio(args) => {
+                let mut params = ExportPortfolioParams::new();
+                params.from_account = args.from_account;
+                params.from_asset_class = args.from_asset_class;
+                let response = moneymoney::export_portfolio(params)?;
                 match args.format {
                     OutputFormat::Json => write_json_pretty_stdout(&response)?,
                 }
