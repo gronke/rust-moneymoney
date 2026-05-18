@@ -17,6 +17,8 @@ use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 
+use sdef::Dictionary;
+
 const DEFAULT_SDEF_PATH: &str = "/Applications/MoneyMoney.app/Contents/Resources/MoneyMoney.sdef";
 const SDEF_ENV_VAR: &str = "MONEYMONEY_SDEF_PATH";
 
@@ -50,56 +52,18 @@ fn read_sdef_or_skip(test_name: &str) -> Option<String> {
     }
 }
 
-// ---------------------------------------------------------------------------
-// Minimal sdef parser. The file is well-formed XML but a substring-based extractor
-// is enough for our shape and keeps the test crate dep-free.
-// ---------------------------------------------------------------------------
-
-/// (parameter name as it appears in the sdef, `optional="yes"` flag)
-type Param = (String, bool);
-
-fn command_block<'a>(sdef: &'a str, name: &str) -> &'a str {
-    let open = format!(r#"<command name="{name}""#);
-    let start = sdef
-        .find(&open)
-        .unwrap_or_else(|| panic!("command '{name}' not found in sdef"));
-    let close = "</command>";
-    let end = sdef[start..]
-        .find(close)
-        .unwrap_or_else(|| panic!("unterminated <command> for '{name}'"))
-        + start
-        + close.len();
-    &sdef[start..end]
-}
-
-fn attr<'a>(tag: &'a str, key: &str) -> Option<&'a str> {
-    let needle = format!(r#"{key}=""#);
-    let start = tag.find(&needle)? + needle.len();
-    let len = tag[start..].find('"')?;
-    Some(&tag[start..start + len])
-}
-
-fn parameters(block: &str) -> Vec<Param> {
-    let mut out = Vec::new();
-    let mut rest = block;
-    while let Some(idx) = rest.find("<parameter ") {
-        let tail = &rest[idx..];
-        let close = tail.find('>').expect("malformed <parameter ... >");
-        let tag = &tail[..close];
-        let name = attr(tag, "name")
-            .expect("parameter without name")
-            .to_string();
-        let optional = attr(tag, "optional") == Some("yes");
-        out.push((name, optional));
-        rest = &tail[close..];
-    }
-    out
-}
-
 fn documented_param_names(sdef: &str, command: &str) -> HashSet<String> {
-    parameters(command_block(sdef, command))
-        .into_iter()
-        .map(|(n, _)| n)
+    let dict: Dictionary = sdef
+        .parse()
+        .expect("MoneyMoney.sdef failed to parse as a Dictionary");
+    dict.suites
+        .iter()
+        .flat_map(|s| &s.commands)
+        .find(|c| c.name == command)
+        .unwrap_or_else(|| panic!("command '{command}' not found in sdef"))
+        .parameters
+        .iter()
+        .map(|p| p.name.clone())
         .collect()
 }
 
