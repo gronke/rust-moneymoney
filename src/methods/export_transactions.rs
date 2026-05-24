@@ -149,6 +149,8 @@ pub struct MoneymoneyTransaction {
     pub booked: bool,
     /// UUID of the category this transaction is assigned to.
     pub category_uuid: Uuid,
+    /// Category identifier (newer MoneyMoney plist key).
+    pub category_id: Option<u64>,
     /// Whether the transaction has been manually checked/verified.
     pub checkmark: bool,
     /// SEPA-Mandatsreferenz
