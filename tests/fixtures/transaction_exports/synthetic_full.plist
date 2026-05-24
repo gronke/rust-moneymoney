@@ -53,6 +53,8 @@
             <true/>
             <key>categoryUuid</key>
             <string>a2fea395-d50a-41f9-913a-4a73dec89e72</string>
+            <key>categoryId</key>
+            <integer>72</integer>
             <key>checkmark</key>
             <false/>
             <key>mandateReference</key>

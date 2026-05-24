@@ -59,6 +59,7 @@ const EXPECTED_KEYS: &[&str] = &[
     "accountUuid",
     "booked",
     "categoryUuid",
+    "categoryId",
     "checkmark",
     "mandateReference",
     "comment",
